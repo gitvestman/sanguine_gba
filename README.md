@@ -4,26 +4,38 @@ A from-scratch Game Boy Advance port of **Sanguine** (`D:\Workspace\Godot\sangui
 See [IMPLEMENTATION_PLAN.md](IMPLEMENTATION_PLAN.md) for the full design/roadmap.
 
 **Status:** Phase 0 (toolchain) and Phase 1 (vertical slice) are done. The whole Basement
-floor (10 rooms) is playable: room-to-room navigation, paginated story text, a D-pad choice
-menu, and real d20 skill checks against Sanguine's actual dice math. No combat, dialogue,
-save/load, or inventory UI yet (later phases) — a couple of rooms that would normally start a
-fight or a conversation show a short placeholder line instead and let you carry on.
+floor (10 rooms) is playable: room-to-room navigation, paginated story text, a choice menu,
+d20 skill checks using Sanguine's dice math, a stats sidebar and an item-icon sidebar.
+Not yet ported (later phases): combat, dialogue, save/load, the zodiac door puzzle, and exits
+to other floors. Rooms that would start a fight or a conversation show a short placeholder
+line instead.
 
 ## Prerequisites
 
-- **devkitARM + Butano**, installed via devkitPro's pacman under **WSL2 Ubuntu** (not native
-  Windows — see the *Toolchain* note below for why).
-- **mGBA** (`mgba-qt`) for running the ROM. On Windows 11, WSLg forwards its window straight
-  to your desktop, so it can also run from inside WSL.
+- **devkitARM + Butano**, installed via devkitPro's pacman under **WSL2 Ubuntu** (see
+  *Toolchain note* below for why not native Windows).
+- **mGBA** (`mgba-qt`) for running the ROM. On Windows 11, WSLg shows its window on your
+  desktop (it appears under an "Ubuntu" entry in the taskbar).
 
-If devkitARM/Butano/mgba-qt aren't installed yet, see the one-time setup commands recorded in
-this project's memory (`project_toolchain_setup.md`) — in short:
+One-time setup, run yourself in a WSL terminal (it needs `sudo`):
 
 ```bash
 sudo apt update
 sudo apt install -y build-essential mgba-qt
-sudo dkp-pacman -S gba-dev   # after installing devkitPro's pacman
 ```
+
+Then install devkitPro's pacman. `apt.devkitpro.org` blocks `wget`/`curl` (Cloudflare), so open
+`https://apt.devkitpro.org/install-devkitpro-pacman` in a browser, save its contents as
+`install-devkitpro-pacman`, and run:
+
+```bash
+chmod +x install-devkitpro-pacman
+sudo ./install-devkitpro-pacman
+sudo dkp-pacman -S gba-dev
+```
+
+Open a new terminal afterwards so `DEVKITPRO`/`DEVKITARM` are set. Butano itself is a git
+submodule — after cloning, run `git submodule update --init`.
 
 ## Building
 
@@ -33,53 +45,70 @@ From the project root, inside WSL (a Windows path like `D:\...` is `/mnt/d/...` 
 make -j$(nproc)
 ```
 
-This produces `sanguine_gba.gba` in the project root. `make clean` removes the `build/`
-directory and the ROM.
+This produces `sanguine_gba.gba` in the project root. `make clean` removes `build/` and the ROM.
 
 ## Running / testing
 
-There's no automated test suite (nothing here is unit-testable in the traditional sense yet —
-it's UI-and-content-driven). To check a change:
+There's no automated test suite; the game is UI- and content-driven. To check a change:
 
 ```bash
-mgba-qt sanguine_gba.gba
+mgba-qt -f sanguine_gba.gba
 ```
 
-- **D-pad up/down** — move the choice-menu cursor (`>` marks the selection)
-- **A** — confirm a choice, advance a paginated text page, or roll the dice in a skill check
-- Start in the **Cellar Hall**; every door, search, and trap on the Basement floor is wired up
-  (see [IMPLEMENTATION_PLAN.md](IMPLEMENTATION_PLAN.md) for which rooms make up that floor)
+Fullscreen (`-f`) avoids window-sizing artifacts under WSLg. mGBA's default keys:
 
-If you change room text/logic, rebuild and relaunch `mgba-qt` — there's no hot reload.
+| GBA | Keyboard | Does |
+|---|---|---|
+| D-pad | Arrow keys | Move the `>` cursor in the choice menu (left/right, or up/down) |
+| A | X | Confirm a choice, advance a text page, roll the dice |
+| B | Z | (unused so far) |
 
-To sanity-check a build without a display (e.g. after changing engine code rather than
-content), it's enough that `make` succeeds and `sanguine_gba.gba` gets produced; booting it in
-mGBA is the real check that nothing crashes or hangs.
+You start in the **Cellar Hall**. The screen shows the room art, the story text / choice menu
+in the bottom panel, your stats (HP, Sanity, Luck) on the right, and the items you carry as
+icons on the left (4 fit).
+
+To see Butano's `BN_LOG(...)` debug output without the GUI, write mGBA's log to a file:
+
+```bash
+mgba-qt -l 255 -C logToFile=1 -C logFile=/tmp/mgba.log sanguine_gba.gba
+```
+
+## Adding art
+
+- **Room backgrounds:** `python3 tools/convert_room_bg.py <room.png> assets/rooms` pads the
+  180x140 painting onto a 256x256 canvas, reduces it to 256 colors, and writes a BMP + JSON for
+  Butano. Rename the output to the room's name and add it to `source/rooms/room_registry.cpp`.
+- **Item icons:** `python3 tools/convert_item_icon.py <icon.png> assets/sprites/item_<name>.bmp`
+  turns a 28x28 icon into a 32x32 sprite. Map it in `source/ui/item_bar.cpp`.
+
+Two GBA quirks this code works around (worth knowing before touching graphics code):
+
+- **Palette index 0 is always transparent.** The room converter puts the border color there,
+  and `main.cpp` sets the backdrop to the same color, so no real art color is lost.
+- **There's only one 256-color background palette, and Butano reuses an already-loaded one
+  without checking its colors.** Always release the old background before creating a new one
+  (see `RoomScreen::_enter_room`), or the new room is drawn with the old room's colors.
 
 ## Project layout
 
 ```
 source/
-  main.cpp            Entry point
-  engine/              Ported GameState/dice/inventory/constants (no Godot/UI dependency)
+  main.cpp              Entry point
+  engine/               Ported GameState, dice, inventory, room base class (no UI code)
   rooms/                One .h/.cpp pair per Basement room, plus room_registry.cpp
-  ui/                   Panel/TextBox/ChoiceList/RoomScreen — the GBA-side "game.gd"
+  ui/                   Panel, TextBox, ChoiceList, SidePanel (stats), ItemBar (icons),
+                        RoomScreen — the GBA-side "game.gd"
 assets/
-  rooms/                Room background art, converted from the source project's PNGs
-                         by tools/convert_room_bg.py (indexed BMP + JSON per Butano's
-                         graphics pipeline)
-  sprites/              Small sprite assets (currently just the text-box panel tile)
-third_party/butano/      Butano engine (git submodule)
+  rooms/                Room backgrounds (BMP + JSON), generated by tools/convert_room_bg.py
+  sprites/              Panel tiles and item icons
+third_party/butano/     Butano engine (git submodule)
 tools/
-  convert_room_bg.py     PNG -> Butano-ready room background converter
+  convert_room_bg.py    PNG -> Butano room background
+  convert_item_icon.py  PNG -> Butano item icon sprite
 ```
 
 ## Toolchain note
 
-devkitARM/Butano are set up under WSL2 Ubuntu rather than natively on Windows because that's
-a much smoother path for this exact stack (apt/pacman packages, and WSLg forwards `mgba-qt`'s
-window to the desktop with no extra setup) — see this project's saved memory
-(`project_toolchain_setup.md`) for the reasoning, the exact install commands, and a couple of
-gotchas hit along the way (notably: `apt.devkitpro.org` blocks `wget`/`curl` behind Cloudflare,
-and installing devkitPro needs `sudo`, which has to be run interactively by you, not by an
-agent).
+devkitARM/Butano run under WSL2 Ubuntu rather than natively on Windows because the apt/pacman
+packages make setup straightforward, and WSLg shows `mgba-qt`'s window on the desktop with no
+extra configuration.

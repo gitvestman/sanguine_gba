@@ -5,7 +5,7 @@
 #include "bn_vector.h"
 
 // The solid backdrop behind the bottom text/choice band, so text stays
-// legible over whatever room art is behind it. Built from 4 tiled 64x64
+// legible over whatever room art is behind it. Built from tiled 64x32
 // sprites (assets/sprites/panel_tile.bmp) rather than a second background
 // layer, since GBA windowing would be needed to show only part of a second
 // bg layer and this is much simpler for a flat-color strip.

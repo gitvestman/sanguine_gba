@@ -22,7 +22,20 @@ def convert(source_png: Path, output_dir: Path, border: tuple[int, int, int]) ->
     offset = ((CANVAS_SIZE[0] - room.width) // 2, (CANVAS_SIZE[1] - room.height) // 2)
     canvas.paste(room.convert("RGB"), offset, mask=room.split()[3])
 
-    indexed = canvas.quantize(colors=MAX_COLORS, method=Image.Quantize.MEDIANCUT)
+    # Pixel art: no dithering, so flat areas stay a single palette entry.
+    indexed = canvas.quantize(colors=MAX_COLORS, method=Image.Quantize.MEDIANCUT,
+                               dither=Image.Dither.NONE)
+
+    # GBA hardware always draws background palette index 0 as transparent
+    # (showing the backdrop color, set to near-black in main.cpp). Put the
+    # border color there so that slot is spent on padding rather than on a
+    # real art color — otherwise whatever quantize() happens to put first
+    # (e.g. the dungeon's orange eyes) silently never renders.
+    border_index = indexed.getpixel((0, 0))
+    if border_index != 0:
+        order = list(range(len(indexed.getpalette()) // 3))
+        order[0], order[border_index] = order[border_index], order[0]
+        indexed = indexed.remap_palette(order)
 
     output_dir.mkdir(parents=True, exist_ok=True)
     stem = source_png.stem

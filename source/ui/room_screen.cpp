@@ -6,14 +6,48 @@
 #include "common_variable_8x8_sprite_font.h"
 
 #include "../engine/dice.h"
+#include "../engine/game_state.h"
+#include "../engine/inventory.h"
 
 namespace sg
 {
 
+namespace
+{
+    void build_stat_lines(bn::ivector<bn::string<8>>& out)
+    {
+        GameState& gs = GameState::instance();
+
+        out.push_back(bn::string<8>("HP"));
+        out.push_back(bn::to_string<8>(gs.stat(Attribute::HP)));
+
+        out.push_back(bn::string<8>("SAN"));
+        out.push_back(bn::to_string<8>(gs.stat(Attribute::SANITY)));
+
+        out.push_back(bn::string<8>("LCK"));
+        out.push_back(bn::to_string<8>(gs.stat(Attribute::LUCK)));
+    }
+
+    void build_owned_items(bn::ivector<ItemId>& out)
+    {
+        Inventory& inventory = Inventory::instance();
+
+        for(int i = 0; i < int(ItemId::COUNT) && ! out.full(); ++i)
+        {
+            if(inventory.has(ItemId(i)))
+            {
+                out.push_back(ItemId(i));
+            }
+        }
+    }
+}
+
 RoomScreen::RoomScreen() :
     _text_generator(common::variable_8x8_sprite_font),
     _text_box(_text_generator),
-    _choices(_text_generator)
+    _choices(_text_generator),
+    _item_bar(-104),
+    _stats_panel(_text_generator, 104)
 {
 }
 
@@ -43,20 +77,39 @@ void RoomScreen::goto_room(RoomId next, const bn::string_view& transition_text)
     _enter_room(next);
 }
 
+void RoomScreen::_refresh_sidebars()
+{
+    bn::vector<bn::string<8>, ui::SidePanel::max_lines> stat_lines;
+    build_stat_lines(stat_lines);
+    _stats_panel.set_lines(stat_lines);
+
+    bn::vector<ItemId, ui::ItemBar::max_icons> items;
+    build_owned_items(items);
+    _item_bar.set_items(items);
+}
+
 void RoomScreen::_enter_room(RoomId id)
 {
     _current_room = id;
 
-    // The bottom 32px panel band (see ui/panel.cpp) covers part of the art;
-    // shifting the background up centers the remaining 180x140 room
-    // painting in the visible 128px strip above the panel instead of in the
-    // full 160px screen, so it's clipped by roughly the same amount at the
-    // top (by the screen edge) as it is at the bottom (by the panel).
-    _background = background_item(id).create_bg(0, -16);
+    // The GBA has a single 256-color background palette, and Butano reuses
+    // an already-loaded 8bpp palette for a new background without checking
+    // its colors (palettes_bank::find_bpp_8). Releasing the previous room's
+    // background first is what makes the new room upload its own palette
+    // instead of being drawn with the old room's colors.
+    _background.reset();
+
+    // Shifts the room art so its own top edge lands exactly on the
+    // screen's top edge (canvas row 58, where the art starts within its
+    // 256x256 canvas — see tools/convert_room_bg.py) instead of centering
+    // it, so no art is cropped at the top; the bottom panel covers the
+    // bottom of the art and the border below it.
+    _background = background_item(id).create_bg(0, -10);
 
     Room& r = room(id);
     bn::string<768> description;
     r.describe(description);
+    _refresh_sidebars();
     show_text(description);
     r.on_enter(*this);
 }
@@ -68,6 +121,7 @@ void RoomScreen::run(RoomId start)
     while(true)
     {
         Room& r = room(_current_room);
+        _refresh_sidebars();
 
         bn::vector<Choice, 8> choices;
         r.build_choices(choices);

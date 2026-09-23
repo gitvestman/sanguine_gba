@@ -8,6 +8,8 @@
 #include "panel.h"
 #include "text_box.h"
 #include "choice_list.h"
+#include "side_panel.h"
+#include "item_bar.h"
 #include "../engine/room.h"
 #include "../engine/constants.h"
 
@@ -43,11 +45,14 @@ public:
 
 private:
     void _enter_room(RoomId id);
+    void _refresh_sidebars();
 
     bn::sprite_text_generator _text_generator;
     ui::Panel _panel;
     ui::TextBox _text_box;
     ui::ChoiceList _choices;
+    ui::ItemBar _item_bar;
+    ui::SidePanel _stats_panel;
     bn::optional<bn::regular_bg_ptr> _background;
     RoomId _current_room = RoomId::CellarHall;
 };
