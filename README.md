@@ -105,6 +105,7 @@ third_party/butano/     Butano engine (git submodule)
 tools/
   convert_room_bg.py    PNG -> Butano room background
   convert_item_icon.py  PNG -> Butano item icon sprite
+  make_die_sprite.py    Generates the d20 sprite used for skill-check rolls
 ```
 
 ## Toolchain note

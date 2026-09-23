@@ -10,6 +10,7 @@
 #include "choice_list.h"
 #include "side_panel.h"
 #include "item_bar.h"
+#include "dice_view.h"
 #include "../engine/room.h"
 #include "../engine/constants.h"
 
@@ -36,8 +37,17 @@ public:
     // and dismisses it (A on the last page).
     void show_text(const bn::string_view& text);
 
+    // Shows a choice menu and blocks until the player picks one; returns its
+    // index.
+    int choose(const bn::ivector<bn::string<40>>& options);
+
     // Blocks until the check is resolved; see Dice::roll_check.
     Result roll(Attribute attribute, int dc, bool cancelable, const bn::string_view& title);
+
+    // Tumbles the on-screen die until it lands on `value` (blocking); it
+    // stays visible until hide_die().
+    void tumble_die(int value);
+    void hide_die();
 
     // Switches the current room: shows `transition_text` first if non-empty,
     // then the new room's background + description (room.gd's add_path).
@@ -53,6 +63,7 @@ private:
     ui::ChoiceList _choices;
     ui::ItemBar _item_bar;
     ui::SidePanel _stats_panel;
+    ui::DiceView _dice_view;
     bn::optional<bn::regular_bg_ptr> _background;
     RoomId _current_room = RoomId::CellarHall;
 };

@@ -51,8 +51,12 @@ RoomScreen::RoomScreen() :
 {
 }
 
+// show_text and choose redraw the sidebars first, since stats and items
+// only change in response to an action, and every action's outcome is shown
+// through one of these two.
 void RoomScreen::show_text(const bn::string_view& text)
 {
+    _refresh_sidebars();
     _text_box.show(text);
 
     while(_text_box.active())
@@ -62,9 +66,38 @@ void RoomScreen::show_text(const bn::string_view& text)
     }
 }
 
+int RoomScreen::choose(const bn::ivector<bn::string<40>>& options)
+{
+    _refresh_sidebars();
+    _choices.set_options(options);
+
+    while(true)
+    {
+        bn::optional<int> picked = _choices.update();
+
+        if(picked.has_value())
+        {
+            return picked.value();
+        }
+
+        bn::core::update();
+    }
+}
+
 Result RoomScreen::roll(Attribute attribute, int dc, bool cancelable, const bn::string_view& title)
 {
-    return Dice::roll_check(_text_box, _choices, attribute, dc, cancelable, title);
+    return Dice::roll_check(*this, attribute, dc, cancelable, title);
+}
+
+void RoomScreen::tumble_die(int value)
+{
+    _refresh_sidebars();
+    _dice_view.tumble_to(value);
+}
+
+void RoomScreen::hide_die()
+{
+    _dice_view.hide();
 }
 
 void RoomScreen::goto_room(RoomId next, const bn::string_view& transition_text)
@@ -109,7 +142,6 @@ void RoomScreen::_enter_room(RoomId id)
     Room& r = room(id);
     bn::string<768> description;
     r.describe(description);
-    _refresh_sidebars();
     show_text(description);
     r.on_enter(*this);
 }
@@ -121,7 +153,6 @@ void RoomScreen::run(RoomId start)
     while(true)
     {
         Room& r = room(_current_room);
-        _refresh_sidebars();
 
         bn::vector<Choice, 8> choices;
         r.build_choices(choices);
@@ -132,21 +163,7 @@ void RoomScreen::run(RoomId start)
             labels.push_back(choice.text);
         }
 
-        _choices.set_options(labels);
-
-        int picked = -1;
-        while(picked < 0)
-        {
-            bn::optional<int> result = _choices.update();
-
-            if(result.has_value())
-            {
-                picked = result.value();
-            }
-
-            bn::core::update();
-        }
-
+        int picked = choose(labels);
         r.on_choice(choices[picked].action_id, *this);
     }
 }

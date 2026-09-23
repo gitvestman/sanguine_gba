@@ -2,10 +2,17 @@
 #include "bn_bg_palettes.h"
 
 #include "ui/room_screen.h"
+#include "engine/rng.h"
 
 int main()
 {
     bn::core::init();
+
+    // The GBA has no hardware random source and bn::random starts from a
+    // fixed seed, so without this every playthrough rolls the same numbers.
+    // Advancing it every frame makes each roll depend on the exact frame
+    // the player pressed a button on.
+    bn::core::set_update_callback([] { sg::rng().update(); });
 
     // Background palette index 0 is always drawn as this backdrop color.
     // tools/convert_room_bg.py puts each room's near-black border fill on

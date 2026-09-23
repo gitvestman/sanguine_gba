@@ -1,10 +1,11 @@
 #include "dice.h"
 
-#include "bn_core.h"
 #include "bn_string.h"
+#include "bn_vector.h"
 
 #include "game_state.h"
 #include "rng.h"
+#include "../ui/room_screen.h"
 
 namespace sg
 {
@@ -39,36 +40,10 @@ namespace
             return "?";
         }
     }
-
-    void wait_for_text(ui::TextBox& text_box)
-    {
-        while(text_box.active())
-        {
-            text_box.update();
-            bn::core::update();
-        }
-    }
-
-    int wait_for_choice(ui::ChoiceList& choices, const bn::ivector<bn::string<40>>& options)
-    {
-        choices.set_options(options);
-
-        while(true)
-        {
-            bn::optional<int> picked = choices.update();
-
-            if(picked.has_value())
-            {
-                return picked.value();
-            }
-
-            bn::core::update();
-        }
-    }
 }
 
-Result Dice::roll_check(ui::TextBox& text_box, ui::ChoiceList& choices, Attribute attribute, int dc,
-                          bool cancelable, const bn::string_view& title)
+Result Dice::roll_check(RoomScreen& screen, Attribute attribute, int dc, bool cancelable,
+                          const bn::string_view& title)
 {
     GameState& game_state = GameState::instance();
     int target = game_state.roll_needed(dc);
@@ -79,8 +54,7 @@ Result Dice::roll_check(ui::TextBox& text_box, ui::ChoiceList& choices, Attribut
     intro.append(attribute_name(attribute));
     intro.append(" vs ");
     intro.append(bn::to_string<8>(target));
-    text_box.show(intro);
-    wait_for_text(text_box);
+    screen.show_text(intro);
 
     bn::vector<bn::string<40>, 2> roll_options;
     roll_options.push_back("Roll dice");
@@ -89,7 +63,7 @@ Result Dice::roll_check(ui::TextBox& text_box, ui::ChoiceList& choices, Attribut
         roll_options.push_back("Cancel");
     }
 
-    int picked = wait_for_choice(choices, roll_options);
+    int picked = screen.choose(roll_options);
 
     if(cancelable && picked == 1)
     {
@@ -103,6 +77,7 @@ Result Dice::roll_check(ui::TextBox& text_box, ui::ChoiceList& choices, Attribut
         int roll = rng().get_int(1, 21);
         int bonus = convert_stat_to_bonus(game_state.stat(attribute));
         int total = roll + bonus;
+        screen.tumble_die(roll);
 
         if(roll == 1)
         {
@@ -137,7 +112,7 @@ Result Dice::roll_check(ui::TextBox& text_box, ui::ChoiceList& choices, Attribut
         {
 
         case Result::SUCCESS:
-            result_text.append(roll == 20 ? "Critical success!" : "Success!");
+            result_text.append(roll == 20 ? "Critical success! +1 Luck" : "Success!");
             break;
 
         case Result::CRITICAL_FAIL:
@@ -149,8 +124,7 @@ Result Dice::roll_check(ui::TextBox& text_box, ui::ChoiceList& choices, Attribut
             break;
         }
 
-        text_box.show(result_text);
-        wait_for_text(text_box);
+        screen.show_text(result_text);
 
         if(result != Result::FAIL || game_state.stat(Attribute::LUCK) <= 0)
         {
@@ -161,7 +135,7 @@ Result Dice::roll_check(ui::TextBox& text_box, ui::ChoiceList& choices, Attribut
         reroll_options.push_back("Reroll (-1 Luck)");
         reroll_options.push_back("Accept");
 
-        if(wait_for_choice(choices, reroll_options) == 1)
+        if(screen.choose(reroll_options) == 1)
         {
             break;
         }
@@ -171,7 +145,8 @@ Result Dice::roll_check(ui::TextBox& text_box, ui::ChoiceList& choices, Attribut
 
     bn::vector<bn::string<40>, 1> continue_options;
     continue_options.push_back("Continue");
-    wait_for_choice(choices, continue_options);
+    screen.choose(continue_options);
+    screen.hide_die();
 
     return result;
 }
