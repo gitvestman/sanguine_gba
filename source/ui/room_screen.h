@@ -57,6 +57,14 @@ private:
     void _enter_room(RoomId id);
     void _refresh_sidebars();
 
+    // Checked at the top of show_text/choose — the two places any story
+    // beat or menu passes through — so death from any source (a trap, a
+    // fight) is caught in one place instead of every damage call site
+    // needing to check it. No death screen/restart exists yet (that needs
+    // Phase 3's save system to reset room/enemy state cleanly), so this
+    // just halts here permanently once it fires.
+    void _check_game_over();
+
     bn::sprite_text_generator _text_generator;
     ui::Panel _panel;
     ui::TextBox _text_box;
@@ -66,6 +74,7 @@ private:
     ui::DiceView _dice_view;
     bn::optional<bn::regular_bg_ptr> _background;
     RoomId _current_room = RoomId::CellarHall;
+    bool _game_over = false;
 };
 
 }

@@ -1,6 +1,7 @@
 #include "homunculus_workshop.h"
 
 #include "../ui/room_screen.h"
+#include "../engine/combat.h"
 
 namespace sg::rooms
 {
@@ -82,12 +83,16 @@ void HomunculusWorkshop::on_choice(int action_id, RoomScreen& screen)
         else
         {
             _found_artifact = true;
-            // Godot starts a fight with the Homunculus here; combat isn't
-            // ported yet (Phase 2), so it's resolved as a scare instead.
-            screen.show_text(
-                "The sigil is wrong, and the embryo leaps at you, snarling! (A fight would "
-                "begin here -- not part of this build yet.) You shove the jar away and back "
-                "out, shaken.");
+            screen.show_text("The sigil is wrong, and the embryo leaps at you, snarling!");
+
+            if(Combat::fight(screen, EnemyId::Homunculus) == CombatResult::WON)
+            {
+                screen.show_text("You shove the twitching remains back into the jar.");
+            }
+            else
+            {
+                screen.show_text("You back out of the workshop, shaken.");
+            }
         }
 
         break;

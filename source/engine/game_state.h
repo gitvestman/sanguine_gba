@@ -41,6 +41,17 @@ public:
     void change_sanity(int delta);
     void change_luck(int delta);
 
+    bool is_dead() const
+    {
+        return stat(Attribute::HP) <= 0;
+    }
+
+    // Bonus to an enemy's to-hit roll / damage for the current difficulty —
+    // mirrors GameState.enemy_to_hit_bonus/enemy_damage_bonus, the
+    // difficulty's own two-sided scaling (harder also hits harder).
+    int enemy_to_hit_bonus() const;
+    int enemy_damage_bonus() const;
+
 private:
     GameState();
 

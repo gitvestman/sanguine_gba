@@ -21,8 +21,10 @@ int convert_stat_to_bonus(int stat)
 
 namespace
 {
-    // RollNeededPerDifficulty from gamestate_singleton.gd.
+    // RollNeededPerDifficulty / EnemyDamageBonusPerDifficulty from
+    // gamestate_singleton.gd, indexed by Difficulty.
     constexpr int roll_needed_per_difficulty[] = { -6, -2, 0, 2, 4 };
+    constexpr int enemy_damage_bonus_per_difficulty[] = { -2, -1, 0, 1, 2 };
 }
 
 GameState& GameState::instance()
@@ -78,6 +80,16 @@ void GameState::change_sanity(int delta)
 void GameState::change_luck(int delta)
 {
     set_stat(Attribute::LUCK, stat(Attribute::LUCK) + delta);
+}
+
+int GameState::enemy_to_hit_bonus() const
+{
+    return roll_needed_per_difficulty[int(_difficulty)];
+}
+
+int GameState::enemy_damage_bonus() const
+{
+    return enemy_damage_bonus_per_difficulty[int(_difficulty)];
 }
 
 }

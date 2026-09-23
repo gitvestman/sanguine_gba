@@ -2,6 +2,7 @@
 
 #include "../ui/room_screen.h"
 #include "../engine/inventory.h"
+#include "../engine/combat.h"
 
 namespace sg::rooms
 {
@@ -134,11 +135,13 @@ void Dungeon::on_choice(int action_id, RoomScreen& screen)
         break;
 
     case 8:
-        // Combat isn't ported yet (Phase 2); resolve it as handled for now.
-        _encounter = DungeonEncounter::SEARCH;
-        _creatures_resolved = true;
-        screen.show_text("(A fight would begin here -- combat isn't part of this build "
-                          "yet.) You drive the creature off and the cells empty out.");
+        if(Combat::fight(screen, EnemyId::DungeonCreatures) == CombatResult::WON)
+        {
+            _encounter = DungeonEncounter::SEARCH;
+            _creatures_resolved = true;
+            screen.show_text("The rest of the creatures scatter, and the cells empty out.");
+        }
+        // On a flee, _encounter stays CHASE_OUT — "Defend" is offered again.
         break;
 
     default:

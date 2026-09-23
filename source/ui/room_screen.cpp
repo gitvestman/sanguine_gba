@@ -53,10 +53,13 @@ RoomScreen::RoomScreen() :
 
 // show_text and choose redraw the sidebars first, since stats and items
 // only change in response to an action, and every action's outcome is shown
-// through one of these two.
+// through one of these two. Checking for game over here too means it's
+// caught right after whatever action killed the player, regardless of
+// where that damage came from.
 void RoomScreen::show_text(const bn::string_view& text)
 {
     _refresh_sidebars();
+    _check_game_over();
     _text_box.show(text);
 
     while(_text_box.active())
@@ -69,18 +72,27 @@ void RoomScreen::show_text(const bn::string_view& text)
 int RoomScreen::choose(const bn::ivector<bn::string<40>>& options)
 {
     _refresh_sidebars();
+    _check_game_over();
     _choices.set_options(options);
 
     while(true)
     {
         bn::optional<int> picked = _choices.update();
 
+        // Always update before returning (even on the frame a pick is
+        // detected), matching show_text()'s loop shape below — otherwise
+        // Butano's "A just pressed" flag (which only refreshes on
+        // bn::core::update(), see bn_keypad_manager.cpp) is still set when
+        // we return, and whatever runs next (almost always a show_text()
+        // call) sees that same stale press and immediately auto-advances
+        // or dismisses its own first page before it's ever actually shown
+        // on screen.
+        bn::core::update();
+
         if(picked.has_value())
         {
             return picked.value();
         }
-
-        bn::core::update();
     }
 }
 
@@ -108,6 +120,27 @@ void RoomScreen::goto_room(RoomId next, const bn::string_view& transition_text)
     }
 
     _enter_room(next);
+}
+
+void RoomScreen::_check_game_over()
+{
+    if(_game_over || ! GameState::instance().is_dead())
+    {
+        return;
+    }
+
+    _game_over = true;
+    _dice_view.hide();
+    _text_box.show("You succumb to your wounds.\n\nGAME OVER");
+
+    // Deliberately never call _text_box.update(): that's what lets an A
+    // press advance/dismiss a page, and this message should stay on screen
+    // for good — there's no death screen or restart yet (see the class
+    // comment on _check_game_over).
+    while(true)
+    {
+        bn::core::update();
+    }
 }
 
 void RoomScreen::_refresh_sidebars()
