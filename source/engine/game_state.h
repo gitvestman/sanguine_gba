@@ -27,6 +27,10 @@ public:
     int stat(Attribute attribute) const;
     void set_stat(Attribute attribute, int value);
 
+    // Restores a stat without the gain/loss SFX — for loading a save, where
+    // nothing was actually "gained" or "lost" just now.
+    void load_stat(Attribute attribute, int value);
+
     Difficulty difficulty() const
     {
         return _difficulty;

@@ -15,18 +15,41 @@ namespace sg
 
 namespace
 {
-    void build_stat_lines(bn::ivector<bn::string<8>>& out)
+    // Each stat is one line (2-letter code, left-aligned + number,
+    // right-aligned) instead of two, so all seven fit in the panel's bottom
+    // half below the portrait. Also fills in a flash color per line by
+    // comparing against prev_stats (one entry per stat, updated in place) —
+    // -1 means "not drawn yet", so the very first draw never flashes.
+    void add_stat_line(bn::ivector<bn::string<4>>& codes, bn::ivector<bn::string<4>>& values,
+                        bn::ivector<ui::StatFlash>& flashes, int& prev_value, const char* code, int value)
+    {
+        codes.push_back(bn::string<4>(code));
+        values.push_back(bn::to_string<4>(value));
+
+        if(prev_value < 0 || prev_value == value)
+        {
+            flashes.push_back(ui::StatFlash::NONE);
+        }
+        else
+        {
+            flashes.push_back(value > prev_value ? ui::StatFlash::GAIN : ui::StatFlash::LOSS);
+        }
+
+        prev_value = value;
+    }
+
+    void build_stat_lines(bn::ivector<bn::string<4>>& codes, bn::ivector<bn::string<4>>& values,
+                           bn::ivector<ui::StatFlash>& flashes, int (&prev_stats)[7])
     {
         GameState& gs = GameState::instance();
 
-        out.push_back(bn::string<8>("HP"));
-        out.push_back(bn::to_string<8>(gs.stat(Attribute::HP)));
-
-        out.push_back(bn::string<8>("SAN"));
-        out.push_back(bn::to_string<8>(gs.stat(Attribute::SANITY)));
-
-        out.push_back(bn::string<8>("LCK"));
-        out.push_back(bn::to_string<8>(gs.stat(Attribute::LUCK)));
+        add_stat_line(codes, values, flashes, prev_stats[0], "HP", gs.stat(Attribute::HP));
+        add_stat_line(codes, values, flashes, prev_stats[1], "SN", gs.stat(Attribute::SANITY));
+        add_stat_line(codes, values, flashes, prev_stats[2], "LK", gs.stat(Attribute::LUCK));
+        add_stat_line(codes, values, flashes, prev_stats[3], "IN", gs.stat(Attribute::INT_));
+        add_stat_line(codes, values, flashes, prev_stats[4], "ST", gs.stat(Attribute::STR));
+        add_stat_line(codes, values, flashes, prev_stats[5], "DX", gs.stat(Attribute::DEX));
+        add_stat_line(codes, values, flashes, prev_stats[6], "DC", gs.stat(Attribute::DC));
     }
 
     void build_owned_items(bn::ivector<ItemId>& out)
@@ -146,9 +169,11 @@ void RoomScreen::_check_game_over()
 
 void RoomScreen::_refresh_sidebars()
 {
-    bn::vector<bn::string<8>, ui::SidePanel::max_lines> stat_lines;
-    build_stat_lines(stat_lines);
-    _stats_panel.set_lines(stat_lines);
+    bn::vector<bn::string<4>, ui::SidePanel::max_lines> stat_codes;
+    bn::vector<bn::string<4>, ui::SidePanel::max_lines> stat_values;
+    bn::vector<ui::StatFlash, ui::SidePanel::max_lines> stat_flashes;
+    build_stat_lines(stat_codes, stat_values, stat_flashes, _prev_stats);
+    _stats_panel.set_lines(stat_codes, stat_values, stat_flashes);
 
     bn::vector<ItemId, ui::ItemBar::max_icons> items;
     build_owned_items(items);

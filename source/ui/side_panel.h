@@ -17,6 +17,15 @@
 namespace sg::ui
 {
 
+// A per-line hint for set_lines: recolor that line green/red for one redraw,
+// to flag a stat that just went up or down.
+enum class StatFlash
+{
+    NONE,
+    GAIN,
+    LOSS
+};
+
 class SidePanel
 {
 
@@ -27,12 +36,19 @@ public:
     // positive for the right edge).
     SidePanel(bn::sprite_text_generator& generator, bn::fixed x);
 
-    void set_lines(const bn::ivector<bn::string<8>>& lines);
+    // codes and values must be the same size (one entry per stat line);
+    // flashes may be shorter (or empty) — missing entries are treated as
+    // StatFlash::NONE. Each line renders as `codes[i]` left-aligned and
+    // `values[i]` right-aligned, so the numbers form a straight column
+    // regardless of the code's width.
+    void set_lines(const bn::ivector<bn::string<4>>& codes, const bn::ivector<bn::string<4>>& values,
+                    const bn::ivector<StatFlash>& flashes);
 
 private:
     bn::sprite_text_generator& _generator;
     bn::fixed _x;
     bn::vector<bn::sprite_ptr, 2> _background;
+    bn::sprite_ptr _portrait;
     bn::vector<bn::sprite_ptr, max_lines * 4> _text_sprites;
 };
 

@@ -75,6 +75,12 @@ private:
     bn::optional<bn::regular_bg_ptr> _background;
     RoomId _current_room = RoomId::CellarHall;
     bool _game_over = false;
+
+    // Previous value of each stat shown in _stats_panel (HP, SAN, LCK, INT,
+    // STR, DEX, DC, in that order), so _refresh_sidebars can flash a line
+    // green/red when it changes. -1 means "not drawn yet" (no flash on the
+    // very first draw).
+    int _prev_stats[7] = { -1, -1, -1, -1, -1, -1, -1 };
 };
 
 }

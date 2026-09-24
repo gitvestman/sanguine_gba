@@ -1,9 +1,27 @@
 #include "game_state.h"
 
 #include "bn_algorithm.h"
+#include "bn_sound_items.h"
 
 namespace sg
 {
+
+namespace
+{
+    // Plays a short SFX whenever a stat mutator actually moves the value
+    // (post-clamp, so e.g. healing at full HP stays silent).
+    void play_stat_change_sfx(int before, int after)
+    {
+        if(after > before)
+        {
+            bn::sound_items::stat_gain.play();
+        }
+        else if(after < before)
+        {
+            bn::sound_items::stat_loss.play();
+        }
+    }
+}
 
 int convert_stat_to_bonus(int stat)
 {
@@ -58,6 +76,14 @@ int GameState::stat(Attribute attribute) const
 }
 
 void GameState::set_stat(Attribute attribute, int value)
+{
+    int before = _stats[int(attribute)];
+    int after = bn::clamp(value, 0, max_stat);
+    _stats[int(attribute)] = after;
+    play_stat_change_sfx(before, after);
+}
+
+void GameState::load_stat(Attribute attribute, int value)
 {
     _stats[int(attribute)] = bn::clamp(value, 0, max_stat);
 }

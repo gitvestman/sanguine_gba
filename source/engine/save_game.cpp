@@ -42,9 +42,9 @@ RoomId SaveGame::load_or_new_game()
     }
 
     GameState& game_state = GameState::instance();
-    game_state.set_stat(Attribute::HP, data.hp);
-    game_state.set_stat(Attribute::SANITY, data.sanity);
-    game_state.set_stat(Attribute::LUCK, data.luck);
+    game_state.load_stat(Attribute::HP, data.hp);
+    game_state.load_stat(Attribute::SANITY, data.sanity);
+    game_state.load_stat(Attribute::LUCK, data.luck);
 
     Inventory& inventory = Inventory::instance();
 

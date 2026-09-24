@@ -207,7 +207,33 @@ trivial to include here.
 
 **Phase 4 — Content port + trim pass.** Remaining rooms/dialogue/enemies, run through the
 content-triage process above as each batch is ported (not as a separate pass afterward —
-catches over-length text while the room is already open in an editor).
+catches over-length text while the room is already open in an editor). Too large for one
+sitting (49 more rooms across 4 areas, 9 dialogue trees, 12 more enemies), so split by
+area — each sub-phase is a self-contained batch of the same size as the Basement floor
+already shipped in Phase 1, portable/testable/committable on its own:
+
+- **4a — Dialogue engine + Prisoner.** Before touching more rooms: the dialogue system itself
+  (branching NPC conversation, `add_dialogue`/`add_dialogue_first`/`add_quit` equivalents)
+  doesn't exist yet, and every later sub-phase needs it. Wiring up Prisoner (already stubbed
+  in Dungeon) proves it end to end without also needing a new floor.
+- **4b — First Floor** (13 rooms: GreatHall, Courtyard, Kitchen, DinnerHall, HallOfArmors,
+  MusicRoom, Chapel, Storage, KitchenCellar, WineCellar, Orangery, Larder,
+  Stairway1stFloor). Connects to the Basement via the Stairway1stFloor/StairwayBasement
+  link both floors already stub out.
+- **4c — Outside** (10 rooms: ForestCrossing, GroundskeeperCottage, Garden, OvergrownPond,
+  MainGate, KitchenEntrance, Cemetery, Mausoleum, Tombstones, CliffTombs). The game's actual
+  chronological start (coach-ride intro leads here); connects to First Floor via MainGate.
+- **4d — Second Floor** (12 rooms: FancyCorridor01, BedChamber01, GreatChamber, Library,
+  HallOfPortraits, AudienceHall, Treasury, Bathroom, ChildrensRoom, Stairway2ndFloor,
+  TrophyRoom, GuestBedroom).
+- **4e — Third Floor** (9 rooms: FancyCorridor02, Reliquary, Observatory, Skybridge,
+  ToymakersWorkshop, DrawingRoom, ScientificLaboratory, plus whichever of the ending/
+  documents rooms belong here) and the remaining enemies/dialogue tied to it (the Countess).
+- **4f — Escape endgame.** `is_escaping()` and the living-pursuers chase — its own system,
+  and only meaningful once the full map from 4a–4e exists to chase the player across.
+
+Enemies and dialogue for a given area are ported alongside that area's own sub-phase (as
+DungeonCreatures/Homunculus were with the Basement in Phases 1–2), not as a separate pass.
 
 **Phase 5 — Audio.** Tracker music + compressed SFX, scoped and estimated as its own
 milestone per the [Audio](#audio) note above.
