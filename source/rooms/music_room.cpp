@@ -70,14 +70,14 @@ void MusicRoom::on_choice(int action_id, RoomScreen& screen)
     }
 }
 
-uint8_t MusicRoom::save_state() const
+uint16_t MusicRoom::save_state() const
 {
-    uint8_t bits = Room::save_state();
+    uint16_t bits = Room::save_state();
     if(_organ_played) bits |= 1 << 1;
     return bits;
 }
 
-void MusicRoom::load_state(uint8_t bits)
+void MusicRoom::load_state(uint16_t bits)
 {
     Room::load_state(bits);
     _organ_played = bits & (1 << 1);

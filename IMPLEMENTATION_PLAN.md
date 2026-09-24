@@ -259,7 +259,17 @@ already shipped in Phase 1, portable/testable/committable on its own:
   porting the movement needs a per-frame position update hook during `Combat::fight`'s
   blocking loop (currently static — `show_enemy` positions once and never moves it), most
   naturally as a small per-enemy "animator" driven each `bn::core::update()` tick rather than
-  a one-shot tween, since Butano has no tween system of its own.
+  a one-shot tween, since Butano has no tween system of its own. Also flagged by the user: in
+  the source project, some of these enemies are visible as *ambient room content*
+  (`Room.get_extra_content()`) before the fight even starts — e.g. the raven already
+  circling in ForestCrossing, or the rat already scurrying in KitchenCellar once
+  `_rat_active()` is true — not summoned only at the moment `Combat::fight` begins the way
+  every enemy overlay currently works (`RoomScreen::show_enemy` is only ever called from
+  inside `Combat::fight`). Those rooms already mention the creature in their description
+  text, but don't show its sprite until combat starts; porting this means also showing (a
+  non-blocking version of) the enemy overlay from within the *room's own* `describe()`/enter
+  flow, before any fight choice is picked, wherever the source room's `get_extra_content()`
+  did the same.
 
 Enemies and dialogue for a given area are ported alongside that area's own sub-phase (as
 DungeonCreatures/Homunculus were with the Basement in Phases 1–2), not as a separate pass.

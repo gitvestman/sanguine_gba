@@ -78,14 +78,14 @@ void KitchenCellar::on_choice(int action_id, RoomScreen& screen)
     }
 }
 
-uint8_t KitchenCellar::save_state() const
+uint16_t KitchenCellar::save_state() const
 {
-    uint8_t bits = Room::save_state();
+    uint16_t bits = Room::save_state();
     if(_rat_appeared) bits |= 1 << 1;
     return bits;
 }
 
-void KitchenCellar::load_state(uint8_t bits)
+void KitchenCellar::load_state(uint16_t bits)
 {
     Room::load_state(bits);
     _rat_appeared = bits & (1 << 1);

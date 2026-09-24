@@ -41,6 +41,7 @@ void Kitchen::build_choices(bn::ivector<Choice>& out)
     else
     {
         out.push_back({ "S", 6 });
+        out.push_back({ "Outside", 7 });
     }
 }
 
@@ -96,11 +97,16 @@ void Kitchen::on_choice(int action_id, RoomScreen& screen)
 
     case 5:
         _south_wall_inspected = true;
-        screen.show_text("Behind a stack of crates, a door leads back to the courtyard.");
+        screen.show_text("Behind a stack of crates, a door leads back to the courtyard, and "
+                          "another out into the night.");
         break;
 
     case 6:
         screen.goto_room(RoomId::Courtyard);
+        break;
+
+    case 7:
+        screen.goto_room(RoomId::KitchenEntrance);
         break;
 
     default:
@@ -108,15 +114,15 @@ void Kitchen::on_choice(int action_id, RoomScreen& screen)
     }
 }
 
-uint8_t Kitchen::save_state() const
+uint16_t Kitchen::save_state() const
 {
-    uint8_t bits = Room::save_state();
+    uint16_t bits = Room::save_state();
     if(_meat_taken) bits |= 1 << 1;
     if(_south_wall_inspected) bits |= 1 << 2;
     return bits;
 }
 
-void Kitchen::load_state(uint8_t bits)
+void Kitchen::load_state(uint16_t bits)
 {
     Room::load_state(bits);
     _meat_taken = bits & (1 << 1);

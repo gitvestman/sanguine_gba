@@ -22,6 +22,8 @@ enum class EnemyId
     Homunculus,
     Rat,
     HungryBats,
+    Raven,
+    MadGnome,
 
     COUNT
 };

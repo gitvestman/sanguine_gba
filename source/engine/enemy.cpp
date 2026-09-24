@@ -10,6 +10,8 @@
 #include "bn_sprite_items_enemy_homunculus.h"
 #include "bn_sprite_items_enemy_rat.h"
 #include "bn_sprite_items_enemy_hungry_bats.h"
+#include "bn_sprite_items_enemy_raven.h"
+#include "bn_sprite_items_enemy_mad_gnome.h"
 
 namespace sg
 {
@@ -78,6 +80,20 @@ namespace
         "The hungry bats swarm you!",
         5, 4, 4, 12, false
     };
+
+    Enemy raven{
+        "the raven",
+        "A raven with eyes gleaming an unnatural red malevolence.",
+        "The raven swoops at you with sharp talons!",
+        3, 3, 2, 10, false
+    };
+
+    Enemy mad_gnome{
+        "the mad gnome",
+        "A wild-eyed gnome, clutching a rusty blade with white-knuckled fury.",
+        "The mad gnome attacks with a rusty blade.",
+        6, 3, 6, 10, false
+    };
 }
 
 Enemy& enemy(EnemyId id)
@@ -95,8 +111,14 @@ Enemy& enemy(EnemyId id)
         return rat;
 
     case EnemyId::HungryBats:
-    default:
         return hungry_bats;
+
+    case EnemyId::Raven:
+        return raven;
+
+    case EnemyId::MadGnome:
+    default:
+        return mad_gnome;
     }
 }
 
@@ -115,8 +137,14 @@ const bn::sprite_item& enemy_sprite_item(EnemyId id)
         return bn::sprite_items::enemy_rat;
 
     case EnemyId::HungryBats:
-    default:
         return bn::sprite_items::enemy_hungry_bats;
+
+    case EnemyId::Raven:
+        return bn::sprite_items::enemy_raven;
+
+    case EnemyId::MadGnome:
+    default:
+        return bn::sprite_items::enemy_mad_gnome;
     }
 }
 

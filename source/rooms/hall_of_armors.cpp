@@ -114,16 +114,16 @@ void HallOfArmors::_maybe_trigger_trap(int exit_side, RoomScreen& screen)
     _trap_sprung = true;
 }
 
-uint8_t HallOfArmors::save_state() const
+uint16_t HallOfArmors::save_state() const
 {
-    uint8_t bits = Room::save_state();
+    uint16_t bits = Room::save_state();
     if(_trap_found) bits |= 1 << 1;
     if(_trap_sprung) bits |= 1 << 2;
     if(_searched) bits |= 1 << 3;
     return bits;
 }
 
-void HallOfArmors::load_state(uint8_t bits)
+void HallOfArmors::load_state(uint16_t bits)
 {
     Room::load_state(bits);
     _trap_found = bits & (1 << 1);

@@ -80,15 +80,15 @@ void TheMachine::on_choice(int action_id, RoomScreen& screen)
     }
 }
 
-uint8_t TheMachine::save_state() const
+uint16_t TheMachine::save_state() const
 {
-    uint8_t bits = Room::save_state();
+    uint16_t bits = Room::save_state();
     if(_machine_fixed) bits |= 1 << 1;
     if(_machine_used) bits |= 1 << 2;
     return bits;
 }
 
-void TheMachine::load_state(uint8_t bits)
+void TheMachine::load_state(uint16_t bits)
 {
     Room::load_state(bits);
     _machine_fixed = bits & (1 << 1);

@@ -92,15 +92,15 @@ void DinnerHall::on_choice(int action_id, RoomScreen& screen)
     }
 }
 
-uint8_t DinnerHall::save_state() const
+uint16_t DinnerHall::save_state() const
 {
-    uint8_t bits = Room::save_state();
+    uint16_t bits = Room::save_state();
     if(_trap_sprung) bits |= 1 << 1;
     if(_searched) bits |= 1 << 2;
     return bits;
 }
 
-void DinnerHall::load_state(uint8_t bits)
+void DinnerHall::load_state(uint16_t bits)
 {
     Room::load_state(bits);
     _trap_sprung = bits & (1 << 1);

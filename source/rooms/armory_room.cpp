@@ -98,14 +98,14 @@ void ArmoryRoom::on_choice(int action_id, RoomScreen& screen)
     }
 }
 
-uint8_t ArmoryRoom::save_state() const
+uint16_t ArmoryRoom::save_state() const
 {
-    uint8_t bits = Room::save_state();
+    uint16_t bits = Room::save_state();
     if(_trap_sprung) bits |= 1 << 1;
     return bits;
 }
 
-void ArmoryRoom::load_state(uint8_t bits)
+void ArmoryRoom::load_state(uint16_t bits)
 {
     Room::load_state(bits);
     _trap_sprung = bits & (1 << 1);

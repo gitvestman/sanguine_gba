@@ -51,6 +51,18 @@ enum class RoomId
     Larder,
     Stairway1stFloor,
 
+    // Outside (Phase 4c)
+    ForestCrossing,
+    GroundskeeperCottage,
+    Garden,
+    OvergrownPond,
+    MainGate,
+    KitchenEntrance,
+    Cemetery,
+    Mausoleum,
+    Tombstones,
+    CliffTombs,
+
     COUNT
 };
 
@@ -87,12 +99,12 @@ public:
     // always `visited`; a subclass override must chain to the base for that
     // bit and use bits 1+ for its own fields (see e.g. Dungeon, whose
     // 4-value _encounter enum needs 2 of them).
-    virtual uint8_t save_state() const
+    virtual uint16_t save_state() const
     {
         return visited ? 1 : 0;
     }
 
-    virtual void load_state(uint8_t bits)
+    virtual void load_state(uint16_t bits)
     {
         visited = bits & 1;
     }

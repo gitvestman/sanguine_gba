@@ -22,6 +22,7 @@ void Orangery::build_choices(bn::ivector<Choice>& out)
 {
     out.push_back({ "Look", 0 });
     out.push_back({ "E", 1 });
+    out.push_back({ "S", 3 });
 
     if(! _searched)
     {
@@ -51,19 +52,23 @@ void Orangery::on_choice(int action_id, RoomScreen& screen)
         screen.show_text("Cracked pots and tangled vines. Nothing worth taking.");
         break;
 
+    case 3:
+        screen.goto_room(RoomId::Garden);
+        break;
+
     default:
         break;
     }
 }
 
-uint8_t Orangery::save_state() const
+uint16_t Orangery::save_state() const
 {
-    uint8_t bits = Room::save_state();
+    uint16_t bits = Room::save_state();
     if(_searched) bits |= 1 << 1;
     return bits;
 }
 
-void Orangery::load_state(uint8_t bits)
+void Orangery::load_state(uint16_t bits)
 {
     Room::load_state(bits);
     _searched = bits & (1 << 1);

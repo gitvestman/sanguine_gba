@@ -127,9 +127,9 @@ void Chapel::on_choice(int action_id, RoomScreen& screen)
     }
 }
 
-uint8_t Chapel::save_state() const
+uint16_t Chapel::save_state() const
 {
-    uint8_t bits = Room::save_state();
+    uint16_t bits = Room::save_state();
     if(_searched) bits |= 1 << 1;
     if(_gate_found) bits |= 1 << 2;
     if(_gate_unlocked) bits |= 1 << 3;
@@ -138,7 +138,7 @@ uint8_t Chapel::save_state() const
     return bits;
 }
 
-void Chapel::load_state(uint8_t bits)
+void Chapel::load_state(uint16_t bits)
 {
     Room::load_state(bits);
     _searched = bits & (1 << 1);

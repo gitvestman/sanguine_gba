@@ -67,14 +67,14 @@ void Stairway1stFloor::on_choice(int action_id, RoomScreen& screen)
     }
 }
 
-uint8_t Stairway1stFloor::save_state() const
+uint16_t Stairway1stFloor::save_state() const
 {
-    uint8_t bits = Room::save_state();
+    uint16_t bits = Room::save_state();
     if(_searched) bits |= 1 << 1;
     return bits;
 }
 
-void Stairway1stFloor::load_state(uint8_t bits)
+void Stairway1stFloor::load_state(uint16_t bits)
 {
     Room::load_state(bits);
     _searched = bits & (1 << 1);

@@ -5,6 +5,7 @@
 #include "../ui/room_screen.h"
 #include "../engine/game_state.h"
 #include "../engine/rng.h"
+#include "cliff_tombs.h"
 
 namespace sg::rooms
 {
@@ -48,6 +49,7 @@ void CellarHall::build_choices(bn::ivector<Choice>& out)
     out.push_back({ "W", 11 });
     out.push_back({ "NE", 12 });
     out.push_back({ "E", 13 });
+    out.push_back({ "S", 14 });
 
     if(! north_secret_door_found)
     {
@@ -121,6 +123,11 @@ void CellarHall::on_choice(int action_id, RoomScreen& screen)
         screen.goto_room(RoomId::Dungeon);
         break;
 
+    case 14:
+        static_cast<CliffTombs&>(room(RoomId::CliffTombs)).set_found_hidden();
+        screen.goto_room(RoomId::CliffTombs);
+        break;
+
     case 7:
     {
         Result result = screen.roll(Attribute::INT_, 10, true, "Search");
@@ -144,15 +151,15 @@ void CellarHall::on_choice(int action_id, RoomScreen& screen)
     }
 }
 
-uint8_t CellarHall::save_state() const
+uint16_t CellarHall::save_state() const
 {
-    uint8_t bits = Room::save_state();
+    uint16_t bits = Room::save_state();
     if(_trap_sprung) bits |= 1 << 1;
     if(north_secret_door_found) bits |= 1 << 2;
     return bits;
 }
 
-void CellarHall::load_state(uint8_t bits)
+void CellarHall::load_state(uint16_t bits)
 {
     Room::load_state(bits);
     _trap_sprung = bits & (1 << 1);

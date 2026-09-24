@@ -94,16 +94,16 @@ void Larder::on_choice(int action_id, RoomScreen& screen)
     }
 }
 
-uint8_t Larder::save_state() const
+uint16_t Larder::save_state() const
 {
-    uint8_t bits = Room::save_state();
+    uint16_t bits = Room::save_state();
     if(_searched) bits |= 1 << 1;
     if(_barrels_opened) bits |= 1 << 2;
     if(_steeled) bits |= 1 << 3;
     return bits;
 }
 
-void Larder::load_state(uint8_t bits)
+void Larder::load_state(uint16_t bits)
 {
     Room::load_state(bits);
     _searched = bits & (1 << 1);

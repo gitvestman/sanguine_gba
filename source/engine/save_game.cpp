@@ -25,10 +25,15 @@ namespace
         uint8_t sanity;
         uint8_t luck;
         uint8_t inventory_mask;
-        uint8_t room_state[int(RoomId::COUNT)];
+
+        // Widened from uint8_t once Cemetery's Myling encounter (Phase 4c)
+        // needed more than 8 bits of state for one room — a GBA SRAM chip
+        // has many KB to spare, so this is just a self-imposed sanity
+        // bound below, not a hardware limit.
+        uint16_t room_state[int(RoomId::COUNT)];
     };
 
-    static_assert(sizeof(SaveData) <= 64, "Save data has grown past a sane SRAM footprint");
+    static_assert(sizeof(SaveData) <= 256, "Save data has grown past a sane SRAM footprint");
 }
 
 RoomId SaveGame::load_or_new_game()
@@ -38,7 +43,7 @@ RoomId SaveGame::load_or_new_game()
 
     if(data.magic != magic)
     {
-        return RoomId::CellarHall;
+        return RoomId::ForestCrossing;
     }
 
     GameState& game_state = GameState::instance();

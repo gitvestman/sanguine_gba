@@ -78,14 +78,14 @@ void Ossuary::on_choice(int action_id, RoomScreen& screen)
     }
 }
 
-uint8_t Ossuary::save_state() const
+uint16_t Ossuary::save_state() const
 {
-    uint8_t bits = Room::save_state();
+    uint16_t bits = Room::save_state();
     if(_search_skeleton_key) bits |= 1 << 1;
     return bits;
 }
 
-void Ossuary::load_state(uint8_t bits)
+void Ossuary::load_state(uint16_t bits)
 {
     Room::load_state(bits);
     _search_skeleton_key = bits & (1 << 1);

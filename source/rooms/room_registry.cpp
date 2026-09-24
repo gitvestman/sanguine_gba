@@ -23,6 +23,16 @@
 #include "bn_regular_bg_items_orangery.h"
 #include "bn_regular_bg_items_larder.h"
 #include "bn_regular_bg_items_stairway_1stfloor.h"
+#include "bn_regular_bg_items_forest_crossing.h"
+#include "bn_regular_bg_items_groundskeeper_cottage.h"
+#include "bn_regular_bg_items_garden.h"
+#include "bn_regular_bg_items_overgrown_pond.h"
+#include "bn_regular_bg_items_main_gate.h"
+#include "bn_regular_bg_items_kitchen_entrance.h"
+#include "bn_regular_bg_items_cemetery.h"
+#include "bn_regular_bg_items_mausoleum.h"
+#include "bn_regular_bg_items_tombstones.h"
+#include "bn_regular_bg_items_cliff_tombs.h"
 
 #include "cellar_hall.h"
 #include "ossuary.h"
@@ -47,6 +57,16 @@
 #include "orangery.h"
 #include "larder.h"
 #include "stairway_1stfloor.h"
+#include "forest_crossing.h"
+#include "groundskeeper_cottage.h"
+#include "garden.h"
+#include "overgrown_pond.h"
+#include "main_gate.h"
+#include "kitchen_entrance.h"
+#include "cemetery.h"
+#include "mausoleum.h"
+#include "tombstones.h"
+#include "cliff_tombs.h"
 
 // Wires up RoomId <-> Room instance <-> converted background asset. Each
 // room is a function-local static singleton (Meyer's singleton), so
@@ -81,6 +101,16 @@ Room& room(RoomId id)
     static rooms::Orangery orangery;
     static rooms::Larder larder;
     static rooms::Stairway1stFloor stairway_1stfloor;
+    static rooms::ForestCrossing forest_crossing;
+    static rooms::GroundskeeperCottage groundskeeper_cottage;
+    static rooms::Garden garden;
+    static rooms::OvergrownPond overgrown_pond;
+    static rooms::MainGate main_gate;
+    static rooms::KitchenEntrance kitchen_entrance;
+    static rooms::Cemetery cemetery;
+    static rooms::Mausoleum mausoleum;
+    static rooms::Tombstones tombstones;
+    static rooms::CliffTombs cliff_tombs;
 
     switch(id)
     {
@@ -153,6 +183,36 @@ Room& room(RoomId id)
 
     case RoomId::Stairway1stFloor:
         return stairway_1stfloor;
+
+    case RoomId::ForestCrossing:
+        return forest_crossing;
+
+    case RoomId::GroundskeeperCottage:
+        return groundskeeper_cottage;
+
+    case RoomId::Garden:
+        return garden;
+
+    case RoomId::OvergrownPond:
+        return overgrown_pond;
+
+    case RoomId::MainGate:
+        return main_gate;
+
+    case RoomId::KitchenEntrance:
+        return kitchen_entrance;
+
+    case RoomId::Cemetery:
+        return cemetery;
+
+    case RoomId::Mausoleum:
+        return mausoleum;
+
+    case RoomId::Tombstones:
+        return tombstones;
+
+    case RoomId::CliffTombs:
+        return cliff_tombs;
 
     default:
         return cellar_hall;
@@ -232,6 +292,36 @@ const bn::regular_bg_item& background_item(RoomId id)
 
     case RoomId::Stairway1stFloor:
         return bn::regular_bg_items::stairway_1stfloor;
+
+    case RoomId::ForestCrossing:
+        return bn::regular_bg_items::forest_crossing;
+
+    case RoomId::GroundskeeperCottage:
+        return bn::regular_bg_items::groundskeeper_cottage;
+
+    case RoomId::Garden:
+        return bn::regular_bg_items::garden;
+
+    case RoomId::OvergrownPond:
+        return bn::regular_bg_items::overgrown_pond;
+
+    case RoomId::MainGate:
+        return bn::regular_bg_items::main_gate;
+
+    case RoomId::KitchenEntrance:
+        return bn::regular_bg_items::kitchen_entrance;
+
+    case RoomId::Cemetery:
+        return bn::regular_bg_items::cemetery;
+
+    case RoomId::Mausoleum:
+        return bn::regular_bg_items::mausoleum;
+
+    case RoomId::Tombstones:
+        return bn::regular_bg_items::tombstones;
+
+    case RoomId::CliffTombs:
+        return bn::regular_bg_items::cliff_tombs;
 
     default:
         return bn::regular_bg_items::cellar_hall;

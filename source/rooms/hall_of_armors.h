@@ -24,8 +24,8 @@ public:
     void describe(bn::string<768>& out, bool force_long = false) override;
     void build_choices(bn::ivector<Choice>& out) override;
     void on_choice(int action_id, RoomScreen& screen) override;
-    uint8_t save_state() const override;
-    void load_state(uint8_t bits) override;
+    uint16_t save_state() const override;
+    void load_state(uint16_t bits) override;
 
     // 0 = unknown, 1 = north (from Chapel), 2 = south (from GreatHall).
     void enter_from(int side)
