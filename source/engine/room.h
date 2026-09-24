@@ -77,6 +77,15 @@ enum class RoomId
     TrophyRoom,
     GuestBedroom,
 
+    // Third Floor (Phase 4e)
+    FancyCorridor02,
+    Reliquary,
+    Observatory,
+    Skybridge,
+    ToymakersWorkshop,
+    DrawingRoom,
+    ScientificLaboratory,
+
     COUNT
 };
 

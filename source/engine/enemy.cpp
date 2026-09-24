@@ -13,6 +13,9 @@
 #include "bn_sprite_items_enemy_raven.h"
 #include "bn_sprite_items_enemy_mad_gnome.h"
 #include "bn_sprite_items_enemy_zombie.h"
+#include "bn_sprite_items_enemy_countess.h"
+#include "bn_sprite_items_enemy_golem.h"
+#include "bn_sprite_items_enemy_night_raven.h"
 
 namespace sg
 {
@@ -102,6 +105,33 @@ namespace
         "The zombie swipes at you with rotting claws.",
         10, 4, 6, 10, true
     };
+
+    // Ported with a real, but much simpler, fight than the source's
+    // per-attack reaction-roll system (nine named attacks, each its own
+    // flavor text and a player counter-strike on a successful defense) —
+    // that needs a whole extra combat mode (defensive reaction rolls)
+    // Combat::fight doesn't have. She's still the toughest fight in this
+    // build (highest HP/damage/DC of anything ported so far).
+    Enemy countess{
+        "the Countess",
+        "A pale, imperious woman in a black gown, her eyes utterly without warmth.",
+        "The Countess lunges with unnatural speed.",
+        15, 5, 8, 12, true
+    };
+
+    Enemy golem{
+        "the golem",
+        "A hulking construct of stone and iron, its eyes glowing faint amber.",
+        "The golem swings a massive stone fist.",
+        10, 5, 6, 14, false
+    };
+
+    Enemy night_raven{
+        "the night raven",
+        "A raven larger than any natural bird, its feathers unnaturally black.",
+        "The night raven tears at you with talons like knives.",
+        7, 5, 6, 14, false
+    };
 }
 
 Enemy& enemy(EnemyId id)
@@ -128,8 +158,17 @@ Enemy& enemy(EnemyId id)
         return mad_gnome;
 
     case EnemyId::Zombie:
-    default:
         return zombie;
+
+    case EnemyId::Countess:
+        return countess;
+
+    case EnemyId::Golem:
+        return golem;
+
+    case EnemyId::NightRaven:
+    default:
+        return night_raven;
     }
 }
 
@@ -157,8 +196,17 @@ const bn::sprite_item& enemy_sprite_item(EnemyId id)
         return bn::sprite_items::enemy_mad_gnome;
 
     case EnemyId::Zombie:
-    default:
         return bn::sprite_items::enemy_zombie;
+
+    case EnemyId::Countess:
+        return bn::sprite_items::enemy_countess;
+
+    case EnemyId::Golem:
+        return bn::sprite_items::enemy_golem;
+
+    case EnemyId::NightRaven:
+    default:
+        return bn::sprite_items::enemy_night_raven;
     }
 }
 

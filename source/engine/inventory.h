@@ -25,6 +25,7 @@ enum class ItemId
     DOLL,
     BASTET_FIGURINE,
     SHEET_MUSIC,
+    TOY_SOLDIER,
 
     COUNT
 };

@@ -98,8 +98,7 @@ void ChildrensRoom::on_choice(int action_id, RoomScreen& screen)
     }
 
     case 5:
-        screen.show_text("The stairs climb up into darkness, further than this build "
-                          "reaches yet.");
+        screen.goto_room(RoomId::ToymakersWorkshop);
         break;
 
     case 6:

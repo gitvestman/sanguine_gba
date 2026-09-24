@@ -14,6 +14,7 @@
 #include "bn_sprite_items_item_strange_figurine.h"
 #include "bn_sprite_items_item_doll.h"
 #include "bn_sprite_items_item_bastet_figurine.h"
+#include "bn_sprite_items_item_toy_soldier.h"
 
 namespace sg::ui
 {
@@ -67,6 +68,9 @@ namespace
 
         case ItemId::BASTET_FIGURINE:
             return bn::sprite_items::item_bastet_figurine;
+
+        case ItemId::TOY_SOLDIER:
+            return bn::sprite_items::item_toy_soldier;
 
         // Sheet Music has no dedicated icon in the source project either;
         // falls back to the Cog's icon rather than adding a placeholder.

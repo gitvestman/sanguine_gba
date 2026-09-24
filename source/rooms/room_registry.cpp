@@ -45,6 +45,13 @@
 #include "bn_regular_bg_items_stairway_2ndfloor.h"
 #include "bn_regular_bg_items_trophy_room.h"
 #include "bn_regular_bg_items_guest_bedroom.h"
+#include "bn_regular_bg_items_fancy_corridor_02.h"
+#include "bn_regular_bg_items_reliquary.h"
+#include "bn_regular_bg_items_observatory.h"
+#include "bn_regular_bg_items_skybridge.h"
+#include "bn_regular_bg_items_toymakers_workshop.h"
+#include "bn_regular_bg_items_drawing_room.h"
+#include "bn_regular_bg_items_scientific_laboratory.h"
 
 #include "cellar_hall.h"
 #include "ossuary.h"
@@ -91,62 +98,83 @@
 #include "stairway_2ndfloor.h"
 #include "trophy_room.h"
 #include "guest_bedroom.h"
+#include "fancy_corridor_02.h"
+#include "reliquary.h"
+#include "observatory.h"
+#include "skybridge.h"
+#include "toymakers_workshop.h"
+#include "drawing_room.h"
+#include "scientific_laboratory.h"
 
 // Wires up RoomId <-> Room instance <-> converted background asset. Each
 // room is a function-local static singleton (Meyer's singleton), so
 // cross-room state reads (e.g. StoneCorridor reading CellarHall's
 // north_secret_door_found) just go through room()/the typed accessors in
 // each room's own header.
+//
+// BN_DATA_EWRAM: static data defaults to IWRAM (32KB) in Butano, and by
+// Phase 4e this list of rooms — several of them now embedding a whole
+// Dialogue instance (Countess, Golem, GhostlyBride, MadGnome, Prisoner),
+// each a fixed-capacity table of query/reply strings — overflowed it
+// (a real link error: "section .data is not within region iwram"). EWRAM
+// (256KB) has the room to spare.
 namespace sg
 {
 
 Room& room(RoomId id)
 {
-    static rooms::CellarHall cellar_hall;
-    static rooms::Ossuary ossuary;
-    static rooms::Dungeon dungeon;
-    static rooms::TortureChamber torture_chamber;
-    static rooms::StoneCorridor stone_corridor;
-    static rooms::ArmoryRoom armory_room;
-    static rooms::AlchemicalLaboratory alchemical_laboratory;
-    static rooms::StairwayBasement stairway_basement;
-    static rooms::TheMachine the_machine;
-    static rooms::HomunculusWorkshop homunculus_workshop;
-    static rooms::GreatHall great_hall;
-    static rooms::Courtyard courtyard;
-    static rooms::Kitchen kitchen;
-    static rooms::DinnerHall dinner_hall;
-    static rooms::HallOfArmors hall_of_armors;
-    static rooms::MusicRoom music_room;
-    static rooms::Chapel chapel;
-    static rooms::Storage storage;
-    static rooms::KitchenCellar kitchen_cellar;
-    static rooms::WineCellar wine_cellar;
-    static rooms::Orangery orangery;
-    static rooms::Larder larder;
-    static rooms::Stairway1stFloor stairway_1stfloor;
-    static rooms::ForestCrossing forest_crossing;
-    static rooms::GroundskeeperCottage groundskeeper_cottage;
-    static rooms::Garden garden;
-    static rooms::OvergrownPond overgrown_pond;
-    static rooms::MainGate main_gate;
-    static rooms::KitchenEntrance kitchen_entrance;
-    static rooms::Cemetery cemetery;
-    static rooms::Mausoleum mausoleum;
-    static rooms::Tombstones tombstones;
-    static rooms::CliffTombs cliff_tombs;
-    static rooms::FancyCorridor01 fancy_corridor_01;
-    static rooms::BedChamber01 bedchamber_01;
-    static rooms::GreatChamber great_chamber;
-    static rooms::Library library;
-    static rooms::HallOfPortraits hall_of_portraits;
-    static rooms::AudienceHall audience_hall;
-    static rooms::Treasury treasury;
-    static rooms::Bathroom bathroom;
-    static rooms::ChildrensRoom childrens_room;
-    static rooms::Stairway2ndFloor stairway_2ndfloor;
-    static rooms::TrophyRoom trophy_room;
-    static rooms::GuestBedroom guest_bedroom;
+    BN_DATA_EWRAM static rooms::CellarHall cellar_hall;
+    BN_DATA_EWRAM static rooms::Ossuary ossuary;
+    BN_DATA_EWRAM static rooms::Dungeon dungeon;
+    BN_DATA_EWRAM static rooms::TortureChamber torture_chamber;
+    BN_DATA_EWRAM static rooms::StoneCorridor stone_corridor;
+    BN_DATA_EWRAM static rooms::ArmoryRoom armory_room;
+    BN_DATA_EWRAM static rooms::AlchemicalLaboratory alchemical_laboratory;
+    BN_DATA_EWRAM static rooms::StairwayBasement stairway_basement;
+    BN_DATA_EWRAM static rooms::TheMachine the_machine;
+    BN_DATA_EWRAM static rooms::HomunculusWorkshop homunculus_workshop;
+    BN_DATA_EWRAM static rooms::GreatHall great_hall;
+    BN_DATA_EWRAM static rooms::Courtyard courtyard;
+    BN_DATA_EWRAM static rooms::Kitchen kitchen;
+    BN_DATA_EWRAM static rooms::DinnerHall dinner_hall;
+    BN_DATA_EWRAM static rooms::HallOfArmors hall_of_armors;
+    BN_DATA_EWRAM static rooms::MusicRoom music_room;
+    BN_DATA_EWRAM static rooms::Chapel chapel;
+    BN_DATA_EWRAM static rooms::Storage storage;
+    BN_DATA_EWRAM static rooms::KitchenCellar kitchen_cellar;
+    BN_DATA_EWRAM static rooms::WineCellar wine_cellar;
+    BN_DATA_EWRAM static rooms::Orangery orangery;
+    BN_DATA_EWRAM static rooms::Larder larder;
+    BN_DATA_EWRAM static rooms::Stairway1stFloor stairway_1stfloor;
+    BN_DATA_EWRAM static rooms::ForestCrossing forest_crossing;
+    BN_DATA_EWRAM static rooms::GroundskeeperCottage groundskeeper_cottage;
+    BN_DATA_EWRAM static rooms::Garden garden;
+    BN_DATA_EWRAM static rooms::OvergrownPond overgrown_pond;
+    BN_DATA_EWRAM static rooms::MainGate main_gate;
+    BN_DATA_EWRAM static rooms::KitchenEntrance kitchen_entrance;
+    BN_DATA_EWRAM static rooms::Cemetery cemetery;
+    BN_DATA_EWRAM static rooms::Mausoleum mausoleum;
+    BN_DATA_EWRAM static rooms::Tombstones tombstones;
+    BN_DATA_EWRAM static rooms::CliffTombs cliff_tombs;
+    BN_DATA_EWRAM static rooms::FancyCorridor01 fancy_corridor_01;
+    BN_DATA_EWRAM static rooms::BedChamber01 bedchamber_01;
+    BN_DATA_EWRAM static rooms::GreatChamber great_chamber;
+    BN_DATA_EWRAM static rooms::Library library;
+    BN_DATA_EWRAM static rooms::HallOfPortraits hall_of_portraits;
+    BN_DATA_EWRAM static rooms::AudienceHall audience_hall;
+    BN_DATA_EWRAM static rooms::Treasury treasury;
+    BN_DATA_EWRAM static rooms::Bathroom bathroom;
+    BN_DATA_EWRAM static rooms::ChildrensRoom childrens_room;
+    BN_DATA_EWRAM static rooms::Stairway2ndFloor stairway_2ndfloor;
+    BN_DATA_EWRAM static rooms::TrophyRoom trophy_room;
+    BN_DATA_EWRAM static rooms::GuestBedroom guest_bedroom;
+    BN_DATA_EWRAM static rooms::FancyCorridor02 fancy_corridor_02;
+    BN_DATA_EWRAM static rooms::Reliquary reliquary;
+    BN_DATA_EWRAM static rooms::Observatory observatory;
+    BN_DATA_EWRAM static rooms::Skybridge skybridge;
+    BN_DATA_EWRAM static rooms::ToymakersWorkshop toymakers_workshop;
+    BN_DATA_EWRAM static rooms::DrawingRoom drawing_room;
+    BN_DATA_EWRAM static rooms::ScientificLaboratory scientific_laboratory;
 
     switch(id)
     {
@@ -285,6 +313,27 @@ Room& room(RoomId id)
 
     case RoomId::GuestBedroom:
         return guest_bedroom;
+
+    case RoomId::FancyCorridor02:
+        return fancy_corridor_02;
+
+    case RoomId::Reliquary:
+        return reliquary;
+
+    case RoomId::Observatory:
+        return observatory;
+
+    case RoomId::Skybridge:
+        return skybridge;
+
+    case RoomId::ToymakersWorkshop:
+        return toymakers_workshop;
+
+    case RoomId::DrawingRoom:
+        return drawing_room;
+
+    case RoomId::ScientificLaboratory:
+        return scientific_laboratory;
 
     default:
         return cellar_hall;
@@ -430,6 +479,27 @@ const bn::regular_bg_item& background_item(RoomId id)
 
     case RoomId::GuestBedroom:
         return bn::regular_bg_items::guest_bedroom;
+
+    case RoomId::FancyCorridor02:
+        return bn::regular_bg_items::fancy_corridor_02;
+
+    case RoomId::Reliquary:
+        return bn::regular_bg_items::reliquary;
+
+    case RoomId::Observatory:
+        return bn::regular_bg_items::observatory;
+
+    case RoomId::Skybridge:
+        return bn::regular_bg_items::skybridge;
+
+    case RoomId::ToymakersWorkshop:
+        return bn::regular_bg_items::toymakers_workshop;
+
+    case RoomId::DrawingRoom:
+        return bn::regular_bg_items::drawing_room;
+
+    case RoomId::ScientificLaboratory:
+        return bn::regular_bg_items::scientific_laboratory;
 
     default:
         return bn::regular_bg_items::cellar_hall;

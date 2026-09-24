@@ -25,12 +25,15 @@ int main()
     // entire block would sit on the stack for main()'s whole lifetime
     // (main never returns while the game runs), eating into the stack
     // headroom every deeper call (combat -> dice roll -> text/choice
-    // updates) needs. `static` puts it in BSS instead.
+    // updates) needs. `static` moves it out of the stack; BN_DATA_EWRAM
+    // additionally moves it from IWRAM (32KB, shared with every room's
+    // own static state — see room_registry.cpp) into EWRAM (256KB), which
+    // has room to spare.
     // Restores stats/inventory/room state and picks up where the player
     // left off, if a save exists; otherwise this is a fresh game starting
     // at the Cellar Hall.
     sg::RoomId start = sg::SaveGame::load_or_new_game();
 
-    static sg::RoomScreen screen;
+    BN_DATA_EWRAM static sg::RoomScreen screen;
     screen.run(start);
 }

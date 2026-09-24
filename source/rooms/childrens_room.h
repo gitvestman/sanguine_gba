@@ -6,8 +6,7 @@
 // Ported from D:\Workspace\Godot\sanguine\rooms\childrens_room.gd. The
 // folding-painting popup (a whole separate scene/animation in the source
 // project) is cut — the drawing's sanity-loss beat is kept as a plain
-// show_text instead. The hidden stairs to ToymakersWorkshop are stubbed:
-// that's a Third Floor room, Phase 4e's job.
+// show_text instead. The hidden stairs to ToymakersWorkshop are real.
 namespace sg::rooms
 {
 

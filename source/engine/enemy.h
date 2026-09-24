@@ -25,6 +25,9 @@ enum class EnemyId
     Raven,
     MadGnome,
     Zombie,
+    Countess,
+    Golem,
+    NightRaven,
 
     COUNT
 };
