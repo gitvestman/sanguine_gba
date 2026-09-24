@@ -12,6 +12,7 @@
 #include "bn_sprite_items_enemy_hungry_bats.h"
 #include "bn_sprite_items_enemy_raven.h"
 #include "bn_sprite_items_enemy_mad_gnome.h"
+#include "bn_sprite_items_enemy_zombie.h"
 
 namespace sg
 {
@@ -94,6 +95,13 @@ namespace
         "The mad gnome attacks with a rusty blade.",
         6, 3, 6, 10, false
     };
+
+    Enemy zombie{
+        "the zombie",
+        "A rotting corpse stands before you.",
+        "The zombie swipes at you with rotting claws.",
+        10, 4, 6, 10, true
+    };
 }
 
 Enemy& enemy(EnemyId id)
@@ -117,8 +125,11 @@ Enemy& enemy(EnemyId id)
         return raven;
 
     case EnemyId::MadGnome:
-    default:
         return mad_gnome;
+
+    case EnemyId::Zombie:
+    default:
+        return zombie;
     }
 }
 
@@ -143,8 +154,11 @@ const bn::sprite_item& enemy_sprite_item(EnemyId id)
         return bn::sprite_items::enemy_raven;
 
     case EnemyId::MadGnome:
-    default:
         return bn::sprite_items::enemy_mad_gnome;
+
+    case EnemyId::Zombie:
+    default:
+        return bn::sprite_items::enemy_zombie;
     }
 }
 

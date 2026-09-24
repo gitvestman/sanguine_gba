@@ -46,7 +46,7 @@ void Stairway1stFloor::on_choice(int action_id, RoomScreen& screen)
     }
 
     case 1:
-        screen.show_text("The stairs up are choked with rubble. You'll need another way.");
+        screen.goto_room(RoomId::Stairway2ndFloor);
         break;
 
     case 2:

@@ -33,6 +33,18 @@
 #include "bn_regular_bg_items_mausoleum.h"
 #include "bn_regular_bg_items_tombstones.h"
 #include "bn_regular_bg_items_cliff_tombs.h"
+#include "bn_regular_bg_items_fancy_corridor_01.h"
+#include "bn_regular_bg_items_bedchamber_01.h"
+#include "bn_regular_bg_items_great_chamber.h"
+#include "bn_regular_bg_items_library.h"
+#include "bn_regular_bg_items_hall_of_portraits.h"
+#include "bn_regular_bg_items_audience_hall.h"
+#include "bn_regular_bg_items_treasury.h"
+#include "bn_regular_bg_items_bathroom.h"
+#include "bn_regular_bg_items_childrens_room.h"
+#include "bn_regular_bg_items_stairway_2ndfloor.h"
+#include "bn_regular_bg_items_trophy_room.h"
+#include "bn_regular_bg_items_guest_bedroom.h"
 
 #include "cellar_hall.h"
 #include "ossuary.h"
@@ -67,6 +79,18 @@
 #include "mausoleum.h"
 #include "tombstones.h"
 #include "cliff_tombs.h"
+#include "fancy_corridor_01.h"
+#include "bedchamber_01.h"
+#include "great_chamber.h"
+#include "library.h"
+#include "hall_of_portraits.h"
+#include "audience_hall.h"
+#include "treasury.h"
+#include "bathroom.h"
+#include "childrens_room.h"
+#include "stairway_2ndfloor.h"
+#include "trophy_room.h"
+#include "guest_bedroom.h"
 
 // Wires up RoomId <-> Room instance <-> converted background asset. Each
 // room is a function-local static singleton (Meyer's singleton), so
@@ -111,6 +135,18 @@ Room& room(RoomId id)
     static rooms::Mausoleum mausoleum;
     static rooms::Tombstones tombstones;
     static rooms::CliffTombs cliff_tombs;
+    static rooms::FancyCorridor01 fancy_corridor_01;
+    static rooms::BedChamber01 bedchamber_01;
+    static rooms::GreatChamber great_chamber;
+    static rooms::Library library;
+    static rooms::HallOfPortraits hall_of_portraits;
+    static rooms::AudienceHall audience_hall;
+    static rooms::Treasury treasury;
+    static rooms::Bathroom bathroom;
+    static rooms::ChildrensRoom childrens_room;
+    static rooms::Stairway2ndFloor stairway_2ndfloor;
+    static rooms::TrophyRoom trophy_room;
+    static rooms::GuestBedroom guest_bedroom;
 
     switch(id)
     {
@@ -213,6 +249,42 @@ Room& room(RoomId id)
 
     case RoomId::CliffTombs:
         return cliff_tombs;
+
+    case RoomId::FancyCorridor01:
+        return fancy_corridor_01;
+
+    case RoomId::BedChamber01:
+        return bedchamber_01;
+
+    case RoomId::GreatChamber:
+        return great_chamber;
+
+    case RoomId::Library:
+        return library;
+
+    case RoomId::HallOfPortraits:
+        return hall_of_portraits;
+
+    case RoomId::AudienceHall:
+        return audience_hall;
+
+    case RoomId::Treasury:
+        return treasury;
+
+    case RoomId::Bathroom:
+        return bathroom;
+
+    case RoomId::ChildrensRoom:
+        return childrens_room;
+
+    case RoomId::Stairway2ndFloor:
+        return stairway_2ndfloor;
+
+    case RoomId::TrophyRoom:
+        return trophy_room;
+
+    case RoomId::GuestBedroom:
+        return guest_bedroom;
 
     default:
         return cellar_hall;
@@ -322,6 +394,42 @@ const bn::regular_bg_item& background_item(RoomId id)
 
     case RoomId::CliffTombs:
         return bn::regular_bg_items::cliff_tombs;
+
+    case RoomId::FancyCorridor01:
+        return bn::regular_bg_items::fancy_corridor_01;
+
+    case RoomId::BedChamber01:
+        return bn::regular_bg_items::bedchamber_01;
+
+    case RoomId::GreatChamber:
+        return bn::regular_bg_items::great_chamber;
+
+    case RoomId::Library:
+        return bn::regular_bg_items::library;
+
+    case RoomId::HallOfPortraits:
+        return bn::regular_bg_items::hall_of_portraits;
+
+    case RoomId::AudienceHall:
+        return bn::regular_bg_items::audience_hall;
+
+    case RoomId::Treasury:
+        return bn::regular_bg_items::treasury;
+
+    case RoomId::Bathroom:
+        return bn::regular_bg_items::bathroom;
+
+    case RoomId::ChildrensRoom:
+        return bn::regular_bg_items::childrens_room;
+
+    case RoomId::Stairway2ndFloor:
+        return bn::regular_bg_items::stairway_2ndfloor;
+
+    case RoomId::TrophyRoom:
+        return bn::regular_bg_items::trophy_room;
+
+    case RoomId::GuestBedroom:
+        return bn::regular_bg_items::guest_bedroom;
 
     default:
         return bn::regular_bg_items::cellar_hall;

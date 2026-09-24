@@ -24,6 +24,7 @@ enum class EnemyId
     HungryBats,
     Raven,
     MadGnome,
+    Zombie,
 
     COUNT
 };

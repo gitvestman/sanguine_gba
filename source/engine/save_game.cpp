@@ -24,7 +24,10 @@ namespace
         uint8_t hp;
         uint8_t sanity;
         uint8_t luck;
-        uint8_t inventory_mask;
+        // Widened from uint8_t alongside room_state below, once Phase 4d's
+        // new items (Journal, Strange Figurine, Doll, Bastet Figurine)
+        // pushed ItemId::COUNT past 8.
+        uint16_t inventory_mask;
 
         // Widened from uint8_t once Cemetery's Myling encounter (Phase 4c)
         // needed more than 8 bits of state for one room — a GBA SRAM chip
@@ -87,7 +90,7 @@ void SaveGame::save(RoomId current_room)
     {
         if(inventory.has(ItemId(i)))
         {
-            data.inventory_mask |= uint8_t(1 << i);
+            data.inventory_mask |= uint16_t(1 << i);
         }
     }
 

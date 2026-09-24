@@ -20,6 +20,11 @@ enum class ItemId
     HEALING_TINCTURE,
     HOMUNCULUS,
     COG,
+    JOURNAL,
+    STRANGE_FIGURINE,
+    DOLL,
+    BASTET_FIGURINE,
+    SHEET_MUSIC,
 
     COUNT
 };

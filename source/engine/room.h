@@ -63,6 +63,20 @@ enum class RoomId
     Tombstones,
     CliffTombs,
 
+    // Second Floor (Phase 4d)
+    FancyCorridor01,
+    BedChamber01,
+    GreatChamber,
+    Library,
+    HallOfPortraits,
+    AudienceHall,
+    Treasury,
+    Bathroom,
+    ChildrensRoom,
+    Stairway2ndFloor,
+    TrophyRoom,
+    GuestBedroom,
+
     COUNT
 };
 

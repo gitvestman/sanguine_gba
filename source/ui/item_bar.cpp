@@ -10,6 +10,10 @@
 #include "bn_sprite_items_item_healing_tincture.h"
 #include "bn_sprite_items_item_homunculus.h"
 #include "bn_sprite_items_item_cog.h"
+#include "bn_sprite_items_item_journal.h"
+#include "bn_sprite_items_item_strange_figurine.h"
+#include "bn_sprite_items_item_doll.h"
+#include "bn_sprite_items_item_bastet_figurine.h"
 
 namespace sg::ui
 {
@@ -50,6 +54,23 @@ namespace
             return bn::sprite_items::item_homunculus;
 
         case ItemId::COG:
+            return bn::sprite_items::item_cog;
+
+        case ItemId::JOURNAL:
+            return bn::sprite_items::item_journal;
+
+        case ItemId::STRANGE_FIGURINE:
+            return bn::sprite_items::item_strange_figurine;
+
+        case ItemId::DOLL:
+            return bn::sprite_items::item_doll;
+
+        case ItemId::BASTET_FIGURINE:
+            return bn::sprite_items::item_bastet_figurine;
+
+        // Sheet Music has no dedicated icon in the source project either;
+        // falls back to the Cog's icon rather than adding a placeholder.
+        case ItemId::SHEET_MUSIC:
         default:
             return bn::sprite_items::item_cog;
         }

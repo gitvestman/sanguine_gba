@@ -3,10 +3,8 @@
 
 #include "../engine/room.h"
 
-// Ported from D:\Workspace\Godot\sanguine\rooms\stairway_1stfloor.gd. The
-// "go up" exit to Stairway2ndFloor is stubbed: the Second Floor isn't part
-// of the port yet (Phase 4d). "Go down" to StairwayBasement is real —
-// completing the link that room's own header already reserved.
+// Ported from D:\Workspace\Godot\sanguine\rooms\stairway_1stfloor.gd. Both
+// "go up" (Stairway2ndFloor) and "go down" (StairwayBasement) are real.
 namespace sg::rooms
 {
 
