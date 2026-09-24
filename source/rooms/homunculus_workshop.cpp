@@ -103,4 +103,19 @@ void HomunculusWorkshop::on_choice(int action_id, RoomScreen& screen)
     }
 }
 
+uint8_t HomunculusWorkshop::save_state() const
+{
+    uint8_t bits = Room::save_state();
+    if(_progress_forward) bits |= 1 << 1;
+    if(_found_artifact) bits |= 1 << 2;
+    return bits;
+}
+
+void HomunculusWorkshop::load_state(uint8_t bits)
+{
+    Room::load_state(bits);
+    _progress_forward = bits & (1 << 1);
+    _found_artifact = bits & (1 << 2);
+}
+
 }

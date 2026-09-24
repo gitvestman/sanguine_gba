@@ -144,6 +144,21 @@ void CellarHall::on_choice(int action_id, RoomScreen& screen)
     }
 }
 
+uint8_t CellarHall::save_state() const
+{
+    uint8_t bits = Room::save_state();
+    if(_trap_sprung) bits |= 1 << 1;
+    if(north_secret_door_found) bits |= 1 << 2;
+    return bits;
+}
+
+void CellarHall::load_state(uint8_t bits)
+{
+    Room::load_state(bits);
+    _trap_sprung = bits & (1 << 1);
+    north_secret_door_found = bits & (1 << 2);
+}
+
 CellarHall& cellar_hall()
 {
     return static_cast<CellarHall&>(room(RoomId::CellarHall));

@@ -8,6 +8,7 @@
 #include "../engine/dice.h"
 #include "../engine/game_state.h"
 #include "../engine/inventory.h"
+#include "../engine/save_game.h"
 
 namespace sg
 {
@@ -177,6 +178,12 @@ void RoomScreen::_enter_room(RoomId id)
     r.describe(description);
     show_text(description);
     r.on_enter(*this);
+
+    // Autosave on every room change (gamestate_singleton.gd's autosave(),
+    // called from its own enter_room()) — since combat never changes rooms
+    // while it's in progress, this also means a mid-fight death never
+    // overwrites the checkpoint from before that fight started.
+    SaveGame::save(id);
 }
 
 void RoomScreen::run(RoomId start)

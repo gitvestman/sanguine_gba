@@ -149,4 +149,23 @@ void Dungeon::on_choice(int action_id, RoomScreen& screen)
     }
 }
 
+uint8_t Dungeon::save_state() const
+{
+    uint8_t bits = Room::save_state();
+    bits |= (uint8_t(_encounter) & 0x3) << 1;
+    if(_dungeon_search) bits |= 1 << 3;
+    if(_creatures_resolved) bits |= 1 << 4;
+    if(_wooden_door_opened) bits |= 1 << 5;
+    return bits;
+}
+
+void Dungeon::load_state(uint8_t bits)
+{
+    Room::load_state(bits);
+    _encounter = DungeonEncounter((bits >> 1) & 0x3);
+    _dungeon_search = bits & (1 << 3);
+    _creatures_resolved = bits & (1 << 4);
+    _wooden_door_opened = bits & (1 << 5);
+}
+
 }

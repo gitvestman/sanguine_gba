@@ -4,10 +4,9 @@
 #include "../engine/room.h"
 
 // Ported from D:\Workspace\Godot\sanguine\rooms\dungeon.gd. The wooden-door
-// branch talks to the Prisoner dialogue and the "chase them out" branch
-// starts a real fight in Godot; neither dialogue nor combat exist yet
-// (Phase 2+), so both are stubbed to a short placeholder line that still
-// advances the room's own state machine — see on_choice.
+// branch talks to the Prisoner dialogue, which isn't ported yet (Phase 4+),
+// so it's stubbed to a short placeholder line — see on_choice. The
+// "chase them out" branch's fight is real (Combat::fight).
 namespace sg::rooms
 {
 
@@ -26,6 +25,8 @@ public:
     void describe(bn::string<768>& out, bool force_long = false) override;
     void build_choices(bn::ivector<Choice>& out) override;
     void on_choice(int action_id, RoomScreen& screen) override;
+    uint8_t save_state() const override;
+    void load_state(uint8_t bits) override;
 
 private:
     DungeonEncounter _encounter = DungeonEncounter::INTRO;

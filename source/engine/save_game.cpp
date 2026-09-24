@@ -1,0 +1,97 @@
+#include "save_game.h"
+
+#include <cstdint>
+
+#include "bn_sram.h"
+
+#include "game_state.h"
+#include "inventory.h"
+
+namespace sg
+{
+
+namespace
+{
+    // Bumping this invalidates any existing save (rather than misreading it
+    // as this version's layout) — mirrors SAVE_VERSION in
+    // gamestate_singleton.gd.
+    constexpr uint32_t magic = 0x53'41'56'01; // "SAV" + version 1
+
+    struct SaveData
+    {
+        uint32_t magic;
+        uint8_t current_room;
+        uint8_t hp;
+        uint8_t sanity;
+        uint8_t luck;
+        uint8_t inventory_mask;
+        uint8_t room_state[int(RoomId::COUNT)];
+    };
+
+    static_assert(sizeof(SaveData) <= 64, "Save data has grown past a sane SRAM footprint");
+}
+
+RoomId SaveGame::load_or_new_game()
+{
+    SaveData data{};
+    bn::sram::read(data);
+
+    if(data.magic != magic)
+    {
+        return RoomId::CellarHall;
+    }
+
+    GameState& game_state = GameState::instance();
+    game_state.set_stat(Attribute::HP, data.hp);
+    game_state.set_stat(Attribute::SANITY, data.sanity);
+    game_state.set_stat(Attribute::LUCK, data.luck);
+
+    Inventory& inventory = Inventory::instance();
+
+    for(int i = 0; i < int(ItemId::COUNT); ++i)
+    {
+        if(data.inventory_mask & (1 << i))
+        {
+            inventory.add(ItemId(i));
+        }
+    }
+
+    for(int i = 0; i < int(RoomId::COUNT); ++i)
+    {
+        room(RoomId(i)).load_state(data.room_state[i]);
+    }
+
+    return RoomId(data.current_room);
+}
+
+void SaveGame::save(RoomId current_room)
+{
+    SaveData data{};
+    data.magic = magic;
+    data.current_room = uint8_t(current_room);
+
+    GameState& game_state = GameState::instance();
+    data.hp = uint8_t(game_state.stat(Attribute::HP));
+    data.sanity = uint8_t(game_state.stat(Attribute::SANITY));
+    data.luck = uint8_t(game_state.stat(Attribute::LUCK));
+
+    Inventory& inventory = Inventory::instance();
+    data.inventory_mask = 0;
+
+    for(int i = 0; i < int(ItemId::COUNT); ++i)
+    {
+        if(inventory.has(ItemId(i)))
+        {
+            data.inventory_mask |= uint8_t(1 << i);
+        }
+    }
+
+    for(int i = 0; i < int(RoomId::COUNT); ++i)
+    {
+        data.room_state[i] = room(RoomId(i)).save_state();
+    }
+
+    bn::sram::write(data);
+}
+
+}

@@ -3,6 +3,7 @@
 
 #include "ui/room_screen.h"
 #include "engine/rng.h"
+#include "engine/save_game.h"
 
 int main()
 {
@@ -25,6 +26,11 @@ int main()
     // (main never returns while the game runs), eating into the stack
     // headroom every deeper call (combat -> dice roll -> text/choice
     // updates) needs. `static` puts it in BSS instead.
+    // Restores stats/inventory/room state and picks up where the player
+    // left off, if a save exists; otherwise this is a fresh game starting
+    // at the Cellar Hall.
+    sg::RoomId start = sg::SaveGame::load_or_new_game();
+
     static sg::RoomScreen screen;
-    screen.run(sg::RoomId::CellarHall);
+    screen.run(start);
 }

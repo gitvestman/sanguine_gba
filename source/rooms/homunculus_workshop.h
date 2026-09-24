@@ -4,9 +4,8 @@
 #include "../engine/room.h"
 
 // Ported from D:\Workspace\Godot\sanguine\rooms\homunculus_workshop.gd. A
-// failed creation attempt starts a fight with the Homunculus in Godot;
-// combat isn't ported yet (Phase 2), so it's stubbed the same way as
-// Dungeon's fight branch — see on_choice.
+// failed creation attempt starts a real fight with the Homunculus
+// (Combat::fight) — see on_choice.
 namespace sg::rooms
 {
 
@@ -17,6 +16,8 @@ public:
     void describe(bn::string<768>& out, bool force_long = false) override;
     void build_choices(bn::ivector<Choice>& out) override;
     void on_choice(int action_id, RoomScreen& screen) override;
+    uint8_t save_state() const override;
+    void load_state(uint8_t bits) override;
 
 private:
     bool _progress_forward = false;

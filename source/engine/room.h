@@ -1,6 +1,8 @@
 #ifndef SG_ROOM_H
 #define SG_ROOM_H
 
+#include <cstdint>
+
 #include "bn_string.h"
 #include "bn_vector.h"
 #include "bn_regular_bg_item.h"
@@ -63,6 +65,22 @@ public:
     // Called right after the background/description are shown for a room
     // that was just entered (room.gd's enter_room() override hook).
     virtual void on_enter(RoomScreen& /*screen*/) {}
+
+    // Packs/restores this room's whole persistent state (visited plus every
+    // subclass-specific flag) into/from a single byte for SaveGame — every
+    // room in this floor fits its own state in a handful of bits. Bit 0 is
+    // always `visited`; a subclass override must chain to the base for that
+    // bit and use bits 1+ for its own fields (see e.g. Dungeon, whose
+    // 4-value _encounter enum needs 2 of them).
+    virtual uint8_t save_state() const
+    {
+        return visited ? 1 : 0;
+    }
+
+    virtual void load_state(uint8_t bits)
+    {
+        visited = bits & 1;
+    }
 
     bool visited = false;
 };

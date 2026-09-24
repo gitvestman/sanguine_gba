@@ -16,6 +16,8 @@ public:
     void describe(bn::string<768>& out, bool force_long = false) override;
     void build_choices(bn::ivector<Choice>& out) override;
     void on_choice(int action_id, RoomScreen& screen) override;
+    uint8_t save_state() const override;
+    void load_state(uint8_t bits) override;
 
     // Readable cross-room by StoneCorridor, matching Godot's
     // current_room_state.get_room_state("CELLAR_HALL", "north_secret_door_found", ...).

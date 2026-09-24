@@ -86,4 +86,17 @@ void TortureChamber::on_choice(int action_id, RoomScreen& screen)
     }
 }
 
+uint8_t TortureChamber::save_state() const
+{
+    uint8_t bits = Room::save_state();
+    if(_trap_sprung) bits |= 1 << 1;
+    return bits;
+}
+
+void TortureChamber::load_state(uint8_t bits)
+{
+    Room::load_state(bits);
+    _trap_sprung = bits & (1 << 1);
+}
+
 }

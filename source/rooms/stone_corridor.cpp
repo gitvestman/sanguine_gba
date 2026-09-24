@@ -150,4 +150,19 @@ void StoneCorridor::on_choice(int action_id, RoomScreen& screen)
     }
 }
 
+uint8_t StoneCorridor::save_state() const
+{
+    uint8_t bits = Room::save_state();
+    if(puzzle_door_open) bits |= 1 << 1;
+    if(_examined_puzzle_door) bits |= 1 << 2;
+    return bits;
+}
+
+void StoneCorridor::load_state(uint8_t bits)
+{
+    Room::load_state(bits);
+    puzzle_door_open = bits & (1 << 1);
+    _examined_puzzle_door = bits & (1 << 2);
+}
+
 }

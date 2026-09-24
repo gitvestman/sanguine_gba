@@ -81,4 +81,19 @@ void AlchemicalLaboratory::on_choice(int action_id, RoomScreen& screen)
     }
 }
 
+uint8_t AlchemicalLaboratory::save_state() const
+{
+    uint8_t bits = Room::save_state();
+    if(_progress_forward) bits |= 1 << 1;
+    if(_found_potion) bits |= 1 << 2;
+    return bits;
+}
+
+void AlchemicalLaboratory::load_state(uint8_t bits)
+{
+    Room::load_state(bits);
+    _progress_forward = bits & (1 << 1);
+    _found_potion = bits & (1 << 2);
+}
+
 }
