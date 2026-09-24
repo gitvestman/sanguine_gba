@@ -10,6 +10,13 @@ spinoff sharing this world's cast and opening beat). This plan keeps Sanguine's 
 that structure already fits a handheld's button/menu interface well — and treats the port as
 primarily an **asset-pipeline and content-compression problem**, not a redesign.
 
+**Status (2026-09-24):** Phases 0–4 are complete and committed — all of Phase 4's sub-phases
+(4a dialogue engine, 4b First Floor, 4c Outside, 4d Second Floor, 4e Third Floor + Countess,
+4f escape endgame, 4g title screen) are implemented, boot-tested, and awaiting a full
+playtest. Phase 4h (usable inventory) and 4i (enemy overlay scale/movement/ambient
+appearance) remain future polish per the roadmap below. Phase 5 (audio) and Phase 6 (polish +
+itch.io web build) are not started.
+
 Grounded in a real look at the source project, not assumptions:
 
 | Fact | Source | Why it matters here |
