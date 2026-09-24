@@ -16,6 +16,10 @@ class SaveGame
 {
 
 public:
+    // True if a save from this build's version is present — Phase 4g's
+    // title screen uses this to decide whether "Continue" is even offered.
+    static bool save_exists();
+
     // Restores GameState/Inventory/every room's state from SRAM and
     // returns the room to resume in, if a save from this build's version is
     // present; otherwise leaves everything at its just-constructed default

@@ -32,6 +32,21 @@ class RoomScreen
 public:
     RoomScreen();
 
+    // Phase 4g's title screen: shows the game's name and a New Game/
+    // Continue choice (Continue omitted when `has_save` is false), and
+    // returns 0 for New Game or 1 for Continue. Reuses the same text box/
+    // choice list every other screen in the game uses rather than a
+    // separate title-screen widget — the stat/item sidebars are visible
+    // behind it too (harmless before a save is loaded, if not perfectly
+    // polished — a real title screen without them is future work).
+    int show_title_screen(bool has_save);
+
+    // The coach-ride opening, shown once on a fresh New Game before the
+    // player's first real choice in ForestCrossing. Cut down hard from the
+    // source project's cinematic intro scene (color-shifting sky, sway/
+    // particle effects, gamepad prompts) to the story beats themselves.
+    void show_intro();
+
     // Runs the game forever, starting from `start`.
     [[noreturn]] void run(RoomId start);
 

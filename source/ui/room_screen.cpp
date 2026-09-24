@@ -238,6 +238,31 @@ void RoomScreen::_enter_room(RoomId id)
     SaveGame::save(id);
 }
 
+int RoomScreen::show_title_screen(bool has_save)
+{
+    show_text("SANGUINE\n\nA gothic descent into a castle that should not exist.");
+
+    bn::vector<bn::string<40>, 2> labels;
+    labels.push_back(bn::string<40>("New Game"));
+
+    if(has_save)
+    {
+        labels.push_back(bn::string<40>("Continue"));
+    }
+
+    return choose(labels);
+}
+
+void RoomScreen::show_intro()
+{
+    show_text("The coach rattles down a forgotten road, deep into the mountains, carrying "
+               "you toward a name whispered only in warning.");
+    show_text("The horses grow skittish long before the castle comes into view, as if the "
+               "road itself remembers what waits ahead.");
+    show_text("The coach stops at a crossing in the woods. From here, you go the rest of "
+               "the way on foot.");
+}
+
 void RoomScreen::run(RoomId start)
 {
     _enter_room(start);

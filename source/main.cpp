@@ -29,11 +29,24 @@ int main()
     // additionally moves it from IWRAM (32KB, shared with every room's
     // own static state — see room_registry.cpp) into EWRAM (256KB), which
     // has room to spare.
-    // Restores stats/inventory/room state and picks up where the player
-    // left off, if a save exists; otherwise this is a fresh game starting
-    // at the Cellar Hall.
-    sg::RoomId start = sg::SaveGame::load_or_new_game();
-
     BN_DATA_EWRAM static sg::RoomScreen screen;
+
+    // Phase 4g's title screen: New Game always starts fresh at
+    // ForestCrossing (every room/GameState/Inventory singleton is already
+    // at its just-constructed default — nothing to reset); Continue is
+    // only offered, and only actually loads SRAM, if a save exists.
+    bool has_save = sg::SaveGame::save_exists();
+    int picked = screen.show_title_screen(has_save);
+    sg::RoomId start = sg::RoomId::ForestCrossing;
+
+    if(has_save && picked == 1)
+    {
+        start = sg::SaveGame::load_or_new_game();
+    }
+    else
+    {
+        screen.show_intro();
+    }
+
     screen.run(start);
 }

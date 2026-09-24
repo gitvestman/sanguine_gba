@@ -39,6 +39,13 @@ namespace
     static_assert(sizeof(SaveData) <= 256, "Save data has grown past a sane SRAM footprint");
 }
 
+bool SaveGame::save_exists()
+{
+    SaveData data{};
+    bn::sram::read(data);
+    return data.magic == magic;
+}
+
 RoomId SaveGame::load_or_new_game()
 {
     SaveData data{};
