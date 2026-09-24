@@ -86,6 +86,9 @@ enum class RoomId
     DrawingRoom,
     ScientificLaboratory,
 
+    // Escape endgame (Phase 4f)
+    OutsideGates,
+
     COUNT
 };
 

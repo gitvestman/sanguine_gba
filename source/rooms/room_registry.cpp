@@ -52,6 +52,7 @@
 #include "bn_regular_bg_items_toymakers_workshop.h"
 #include "bn_regular_bg_items_drawing_room.h"
 #include "bn_regular_bg_items_scientific_laboratory.h"
+#include "bn_regular_bg_items_outside_gates.h"
 
 #include "cellar_hall.h"
 #include "ossuary.h"
@@ -105,6 +106,7 @@
 #include "toymakers_workshop.h"
 #include "drawing_room.h"
 #include "scientific_laboratory.h"
+#include "outside_gates.h"
 
 // Wires up RoomId <-> Room instance <-> converted background asset. Each
 // room is a function-local static singleton (Meyer's singleton), so
@@ -175,6 +177,7 @@ Room& room(RoomId id)
     BN_DATA_EWRAM static rooms::ToymakersWorkshop toymakers_workshop;
     BN_DATA_EWRAM static rooms::DrawingRoom drawing_room;
     BN_DATA_EWRAM static rooms::ScientificLaboratory scientific_laboratory;
+    BN_DATA_EWRAM static rooms::OutsideGates outside_gates;
 
     switch(id)
     {
@@ -334,6 +337,9 @@ Room& room(RoomId id)
 
     case RoomId::ScientificLaboratory:
         return scientific_laboratory;
+
+    case RoomId::OutsideGates:
+        return outside_gates;
 
     default:
         return cellar_hall;
@@ -500,6 +506,9 @@ const bn::regular_bg_item& background_item(RoomId id)
 
     case RoomId::ScientificLaboratory:
         return bn::regular_bg_items::scientific_laboratory;
+
+    case RoomId::OutsideGates:
+        return bn::regular_bg_items::outside_gates;
 
     default:
         return bn::regular_bg_items::cellar_hall;

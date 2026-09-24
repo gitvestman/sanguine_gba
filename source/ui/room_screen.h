@@ -67,6 +67,12 @@ public:
     // then the new room's background + description (room.gd's add_path).
     void goto_room(RoomId next, const bn::string_view& transition_text = bn::string_view());
 
+    // Permanently ends the game with a win message (Phase 4f's escape
+    // endgame) — mirrors _check_game_over's shape: shows the text and
+    // never dismisses it, since there's no post-game menu/title screen
+    // yet to return to (Phase 4g).
+    [[noreturn]] void win();
+
     // For widgets that need to draw their own text outside the normal
     // text-box/choice-list flow (e.g. SlidingPuzzle's cell cursor) —
     // sharing this instance instead of constructing another one avoids
@@ -105,6 +111,14 @@ private:
     // green/red when it changes. -1 means "not drawn yet" (no flash on the
     // very first draw).
     int _prev_stats[7] = { -1, -1, -1, -1, -1, -1, -1 };
+
+    // Phase 4f's escape pursuit counter: not saved, matching the source's
+    // own escape_pursuit (reloading mid-escape just means the pursuers
+    // lost the player's trail). Incremented by any non-movement action
+    // while is_escaping(); reset by moving to a new room. See
+    // _handle_escape_pursuit.
+    int _escape_pursuit = 0;
+    void _handle_escape_pursuit(bool moved);
 };
 
 }

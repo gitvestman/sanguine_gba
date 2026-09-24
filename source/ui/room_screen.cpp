@@ -9,6 +9,8 @@
 #include "../engine/game_state.h"
 #include "../engine/inventory.h"
 #include "../engine/save_game.h"
+#include "../engine/escape.h"
+#include "../engine/combat.h"
 
 namespace sg
 {
@@ -254,8 +256,62 @@ void RoomScreen::run(RoomId start)
         }
 
         int picked = choose(labels);
+        RoomId room_before = _current_room;
         r.on_choice(choices[picked].action_id, *this);
+        _handle_escape_pursuit(_current_room != room_before);
     }
+}
+
+void RoomScreen::win()
+{
+    _refresh_sidebars();
+    _text_box.show("You reach the coach and flee into the night, leaving the castle and "
+                    "its horrors behind you.\n\nYOU ESCAPED");
+
+    // Deliberately never call _text_box.update() (see _check_game_over) —
+    // there's no post-game menu yet to return to.
+    while(true)
+    {
+        bn::core::update();
+    }
+}
+
+void RoomScreen::_handle_escape_pursuit(bool moved)
+{
+    if(! is_escaping())
+    {
+        _escape_pursuit = 0;
+        return;
+    }
+
+    if(moved)
+    {
+        _escape_pursuit = 0;
+        return;
+    }
+
+    ++_escape_pursuit;
+
+    if(_escape_pursuit == 1)
+    {
+        show_text("You hear footsteps behind you in the dark.");
+        return;
+    }
+
+    _escape_pursuit = 0;
+    bn::optional<EnemyId> pursuer = pick_pursuer();
+
+    if(! pursuer.has_value())
+    {
+        return;
+    }
+
+    Enemy& target = enemy(pursuer.value());
+    bn::string<160> text;
+    text.append(target.name);
+    text.append(" catches up to you!");
+    show_text(text);
+    Combat::fight(*this, pursuer.value());
 }
 
 }

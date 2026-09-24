@@ -4,8 +4,8 @@
 #include "../engine/room.h"
 
 // Ported from D:\Workspace\Godot\sanguine\rooms\forest_crossing.gd. The
-// south exit to OutsideGates (not one of this sub-phase's 10 rooms) is
-// stubbed. The raven's passive "pecks you every few turns" timer is cut —
+// south exit to OutsideGates is real (Phase 4f). The raven's passive
+// "pecks you every few turns" timer is cut —
 // it lived inside get_choices(), which our build_choices() has no
 // RoomScreen access from (can't show text or deal damage there); a real
 // "Attack raven" fight covers the actual mechanic without it.

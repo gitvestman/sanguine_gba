@@ -78,8 +78,7 @@ void ForestCrossing::on_choice(int action_id, RoomScreen& screen)
         break;
 
     case 3:
-        screen.show_text("The road south leads back toward the castle's outer gates, not "
-                          "open in this build.");
+        screen.goto_room(RoomId::OutsideGates);
         break;
 
     case 4:
