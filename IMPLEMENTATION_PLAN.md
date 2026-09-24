@@ -240,7 +240,12 @@ milestone per the [Audio](#audio) note above.
 
 **Phase 6 — Polish and cart budget close-out.** Final ROM size check against the chosen
 target (see below), difficulty-curve pass, credits/ending states (`GAME_WON`/`GAME_OVER`
-equivalents).
+equivalents), and an **itch.io web build**: devkitARM/Butano only ever produce a real `.gba`
+ROM (there's no wasm/web export in this toolchain), so "playable on itch" means wrapping that
+ROM with a browser-based GBA emulator — [EmulatorJS](https://emulatorjs.org/) is the standard
+choice (it embeds via a small HTML page + its own JS/wasm core, no server needed) — and
+zipping the page + ROM as an itch HTML5 upload. This is packaging, not a build-system change,
+so it can be done once near the end rather than kept in sync with every earlier phase.
 
 ## Open decisions / risks
 

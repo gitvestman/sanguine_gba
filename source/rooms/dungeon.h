@@ -2,10 +2,10 @@
 #define SG_ROOMS_DUNGEON_H
 
 #include "../engine/room.h"
+#include "../dialogue/prisoner.h"
 
 // Ported from D:\Workspace\Godot\sanguine\rooms\dungeon.gd. The wooden-door
-// branch talks to the Prisoner dialogue, which isn't ported yet (Phase 4+),
-// so it's stubbed to a short placeholder line — see on_choice. The
+// branch talks to the Prisoner dialogue (see dialogue/prisoner.h). The
 // "chase them out" branch's fight is real (Combat::fight).
 namespace sg::rooms
 {
@@ -33,6 +33,7 @@ private:
     bool _dungeon_search = false;
     bool _creatures_resolved = false;
     bool _wooden_door_opened = false;
+    dialogue::Prisoner _prisoner;
 };
 
 }

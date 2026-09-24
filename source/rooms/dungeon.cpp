@@ -108,10 +108,18 @@ void Dungeon::on_choice(int action_id, RoomScreen& screen)
 
     case 4:
         _wooden_door_opened = true;
-        // Prisoner dialogue isn't ported yet (Phase 2+); stub the opening
-        // beat and stop there rather than dropping into a broken talk state.
-        screen.show_text("The iron key fits. Inside, a gaunt, chained prisoner squints at "
-                          "you. (His conversation isn't part of this build yet.)");
+
+        if(_prisoner.resolved())
+        {
+            screen.show_text("The prisoner rests quietly, tended to as well as you could "
+                              "manage.");
+        }
+        else
+        {
+            _prisoner.talk(screen, "The iron key fits. Inside, a gaunt, chained prisoner "
+                                    "squints at you.");
+        }
+
         break;
 
     case 5:
@@ -156,6 +164,7 @@ uint8_t Dungeon::save_state() const
     if(_dungeon_search) bits |= 1 << 3;
     if(_creatures_resolved) bits |= 1 << 4;
     if(_wooden_door_opened) bits |= 1 << 5;
+    if(_prisoner.resolved()) bits |= 1 << 6;
     return bits;
 }
 
@@ -166,6 +175,7 @@ void Dungeon::load_state(uint8_t bits)
     _dungeon_search = bits & (1 << 3);
     _creatures_resolved = bits & (1 << 4);
     _wooden_door_opened = bits & (1 << 5);
+    _prisoner.set_resolved(bits & (1 << 6));
 }
 
 }
