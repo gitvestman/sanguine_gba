@@ -32,7 +32,7 @@ public:
 
 protected:
     void initialize_choices() override;
-    void on_choice_selected(int id) override;
+    void on_choice_selected(int id, RoomScreen& screen) override;
 
 private:
     bool _resolved = false;

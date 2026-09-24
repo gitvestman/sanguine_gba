@@ -17,19 +17,19 @@ int Dialogue::_find(int id)
 }
 
 void Dialogue::add_dialogue(int id, const bn::string_view& query, const bn::string_view& reply,
-                             DialogueChoiceType type)
+                             DialogueChoiceType type, bool hidden)
 {
     if(_find(id) >= 0 || _choices.full())
     {
         return;
     }
 
-    _choices.push_back({ id, bn::string<40>(query), bn::string<200>(reply), type });
+    _choices.push_back({ id, bn::string<40>(query), bn::string<200>(reply), type, hidden });
 }
 
-void Dialogue::add_quit(int id, const bn::string_view& query, const bn::string_view& reply)
+void Dialogue::add_quit(int id, const bn::string_view& query, const bn::string_view& reply, bool hidden)
 {
-    add_dialogue(id, query, reply, DialogueChoiceType::QUIT);
+    add_dialogue(id, query, reply, DialogueChoiceType::QUIT, hidden);
 }
 
 void Dialogue::show_dialogue(int id)
@@ -38,7 +38,7 @@ void Dialogue::show_dialogue(int id)
 
     if(index >= 0)
     {
-        _choices[index].type = DialogueChoiceType::ONCE;
+        _choices[index].hidden = false;
     }
 }
 
@@ -48,14 +48,21 @@ void Dialogue::hide_dialogue(int id)
 
     if(index >= 0)
     {
-        _choices[index].type = DialogueChoiceType::HIDDEN;
+        _choices[index].hidden = true;
     }
 }
 
-void Dialogue::talk(RoomScreen& screen, const bn::string_view& opening_line)
+void Dialogue::talk(RoomScreen& screen, const bn::string_view& opening_line,
+                     const bn::sprite_item* portrait)
 {
     _choices.clear();
     initialize_choices();
+
+    if(portrait)
+    {
+        screen.show_overlay_sprite(*portrait);
+    }
+
     screen.show_text(opening_line);
 
     while(true)
@@ -65,7 +72,7 @@ void Dialogue::talk(RoomScreen& screen, const bn::string_view& opening_line)
 
         for(const Entry& entry : _choices)
         {
-            if(entry.type != DialogueChoiceType::HIDDEN)
+            if(! entry.hidden)
             {
                 labels.push_back(entry.query);
                 ids.push_back(entry.id);
@@ -98,12 +105,17 @@ void Dialogue::talk(RoomScreen& screen, const bn::string_view& opening_line)
             _choices.erase(_choices.begin() + index);
         }
 
-        on_choice_selected(id);
+        on_choice_selected(id, screen);
 
         if(quit)
         {
             break;
         }
+    }
+
+    if(portrait)
+    {
+        screen.hide_overlay_sprite();
     }
 }
 

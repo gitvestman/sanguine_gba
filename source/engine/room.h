@@ -36,6 +36,21 @@ enum class RoomId
     TheMachine,
     HomunculusWorkshop,
 
+    // First Floor (Phase 4b)
+    GreatHall,
+    Courtyard,
+    Kitchen,
+    DinnerHall,
+    HallOfArmors,
+    MusicRoom,
+    Chapel,
+    Storage,
+    KitchenCellar,
+    WineCellar,
+    Orangery,
+    Larder,
+    Stairway1stFloor,
+
     COUNT
 };
 

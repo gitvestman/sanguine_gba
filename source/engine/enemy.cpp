@@ -6,6 +6,11 @@
 #include "rng.h"
 #include "../ui/room_screen.h"
 
+#include "bn_sprite_items_enemy_dungeon_creatures.h"
+#include "bn_sprite_items_enemy_homunculus.h"
+#include "bn_sprite_items_enemy_rat.h"
+#include "bn_sprite_items_enemy_hungry_bats.h"
+
 namespace sg
 {
 
@@ -59,6 +64,20 @@ namespace
         "The homunculus slashes with magical energy.",
         8, 4, 6, 12, false
     };
+
+    Enemy rat{
+        "the rat",
+        "A large, mangy rat, driven bold by hunger.",
+        "The rat lunges and sinks its teeth into your leg!",
+        2, 3, 2, 10, false
+    };
+
+    Enemy hungry_bats{
+        "the hungry bats",
+        "A cloud of bats, agitated and hungry for blood.",
+        "The hungry bats swarm you!",
+        5, 4, 4, 12, false
+    };
 }
 
 Enemy& enemy(EnemyId id)
@@ -70,8 +89,34 @@ Enemy& enemy(EnemyId id)
         return dungeon_creatures;
 
     case EnemyId::Homunculus:
-    default:
         return homunculus;
+
+    case EnemyId::Rat:
+        return rat;
+
+    case EnemyId::HungryBats:
+    default:
+        return hungry_bats;
+    }
+}
+
+const bn::sprite_item& enemy_sprite_item(EnemyId id)
+{
+    switch(id)
+    {
+
+    case EnemyId::DungeonCreatures:
+        return bn::sprite_items::enemy_dungeon_creatures;
+
+    case EnemyId::Homunculus:
+        return bn::sprite_items::enemy_homunculus;
+
+    case EnemyId::Rat:
+        return bn::sprite_items::enemy_rat;
+
+    case EnemyId::HungryBats:
+    default:
+        return bn::sprite_items::enemy_hungry_bats;
     }
 }
 

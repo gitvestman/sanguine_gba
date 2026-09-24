@@ -3,9 +3,7 @@
 
 #include "../engine/room.h"
 
-// Ported from D:\Workspace\Godot\sanguine\rooms\stairway_basement.gd. The
-// "go up" exit to Stairway1stFloor is omitted: the First Floor isn't part
-// of this vertical slice yet (Phase 4 ports the remaining floors).
+// Ported from D:\Workspace\Godot\sanguine\rooms\stairway_basement.gd.
 namespace sg::rooms
 {
 

@@ -2,6 +2,7 @@
 #define SG_ENEMY_H
 
 #include "bn_string_view.h"
+#include "bn_sprite_item.h"
 
 // Ported from D:\Workspace\Godot\sanguine\enemies\enemy.gd. Every enemy
 // there overrides do_action() only to call the shared attack_player() with
@@ -19,6 +20,8 @@ enum class EnemyId
 {
     DungeonCreatures,
     Homunculus,
+    Rat,
+    HungryBats,
 
     COUNT
 };
@@ -66,6 +69,10 @@ public:
 };
 
 Enemy& enemy(EnemyId id);
+
+// The sprite shown overlaid on the room background during Combat::fight —
+// matches the source project's SpriteAnimations.*() enemy art overlay.
+const bn::sprite_item& enemy_sprite_item(EnemyId id);
 
 }
 

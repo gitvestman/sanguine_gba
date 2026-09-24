@@ -28,7 +28,7 @@ void Prisoner::initialize_choices()
                  "Tears well in his eyes. He is malnourished and wounded.");
 }
 
-void Prisoner::on_choice_selected(int id)
+void Prisoner::on_choice_selected(int id, RoomScreen&)
 {
     switch(id)
     {

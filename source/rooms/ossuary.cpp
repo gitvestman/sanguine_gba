@@ -1,6 +1,7 @@
 #include "ossuary.h"
 
 #include "../ui/room_screen.h"
+#include "chapel.h"
 
 namespace sg::rooms
 {
@@ -9,7 +10,7 @@ namespace
 {
     constexpr bn::string_view long_description =
         "A silent stone chamber. Old bones, pulled from their alcoves, litter the floor. An "
-        "iron gate to the east, and stairs up to the west.";
+        "iron gate to the east, and stairs up to a chapel.";
     constexpr bn::string_view short_description = "The ossuary.";
 }
 
@@ -23,6 +24,7 @@ void Ossuary::build_choices(bn::ivector<Choice>& out)
 {
     out.push_back({ "Look", 0 });
     out.push_back({ "E", 1 });
+    out.push_back({ "Up", 5 });
 
     if(! _search_skeleton_key)
     {
@@ -45,6 +47,11 @@ void Ossuary::on_choice(int action_id, RoomScreen& screen)
 
     case 1:
         screen.goto_room(RoomId::CellarHall);
+        break;
+
+    case 5:
+        static_cast<Chapel&>(room(RoomId::Chapel)).set_entered_from_ossuary(true);
+        screen.goto_room(RoomId::Chapel);
         break;
 
     case 4:

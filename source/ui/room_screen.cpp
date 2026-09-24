@@ -136,6 +136,26 @@ void RoomScreen::hide_die()
     _dice_view.hide();
 }
 
+void RoomScreen::show_enemy(EnemyId id)
+{
+    show_overlay_sprite(enemy_sprite_item(id));
+}
+
+void RoomScreen::hide_enemy()
+{
+    hide_overlay_sprite();
+}
+
+void RoomScreen::show_overlay_sprite(const bn::sprite_item& item)
+{
+    _enemy_sprite = item.create_sprite(0, -8);
+}
+
+void RoomScreen::hide_overlay_sprite()
+{
+    _enemy_sprite.reset();
+}
+
 void RoomScreen::goto_room(RoomId next, const bn::string_view& transition_text)
 {
     if(! transition_text.empty())
@@ -183,6 +203,11 @@ void RoomScreen::_refresh_sidebars()
 void RoomScreen::_enter_room(RoomId id)
 {
     _current_room = id;
+
+    // Defensive: every Combat::fight() exit path already hides its enemy
+    // sprite, but a room change is the natural place to guarantee no stray
+    // sprite ever survives past its fight.
+    _enemy_sprite.reset();
 
     // The GBA has a single 256-color background palette, and Butano reuses
     // an already-loaded 8bpp palette for a new background without checking

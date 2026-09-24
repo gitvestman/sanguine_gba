@@ -23,6 +23,7 @@ void StairwayBasement::describe(bn::string<768>& out, bool force_long)
 void StairwayBasement::build_choices(bn::ivector<Choice>& out)
 {
     out.push_back({ "Look", 0 });
+    out.push_back({ "Up", 4 });
 
     out.push_back(static_cast<StoneCorridor&>(room(RoomId::StoneCorridor)).puzzle_door_open
                        ? Choice{ "S", 2 }
@@ -55,6 +56,10 @@ void StairwayBasement::on_choice(int action_id, RoomScreen& screen)
     case 3:
         screen.show_text("A heavy door blocks the way south. It can only open from the "
                           "other side.");
+        break;
+
+    case 4:
+        screen.goto_room(RoomId::Stairway1stFloor);
         break;
 
     default:

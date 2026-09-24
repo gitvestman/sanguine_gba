@@ -26,6 +26,7 @@ CombatResult Combat::fight(RoomScreen& screen, EnemyId enemy_id)
 {
     Enemy& target = enemy(enemy_id);
     target.reset_hp();
+    screen.show_enemy(enemy_id);
 
     bn::string<256> intro;
     intro.append("You are attacked by ");
@@ -82,6 +83,7 @@ CombatResult Combat::fight(RoomScreen& screen, EnemyId enemy_id)
             text.append("!");
             screen.show_text(text);
             target.do_action(screen);
+            screen.hide_enemy();
             return CombatResult::FLED;
         }
 
@@ -126,6 +128,7 @@ CombatResult Combat::fight(RoomScreen& screen, EnemyId enemy_id)
             text.append(target.name);
             text.append(".");
             screen.show_text(text);
+            screen.hide_enemy();
             return CombatResult::WON;
         }
 

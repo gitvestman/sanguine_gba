@@ -3,6 +3,7 @@
 
 #include "bn_optional.h"
 #include "bn_regular_bg_ptr.h"
+#include "bn_sprite_ptr.h"
 #include "bn_sprite_text_generator.h"
 
 #include "panel.h"
@@ -13,6 +14,7 @@
 #include "dice_view.h"
 #include "../engine/room.h"
 #include "../engine/constants.h"
+#include "../engine/enemy.h"
 
 // The "game.gd" equivalent: owns the background + text box + choice list and
 // drives the enter-room / show-description / show-choices / act-on-choice
@@ -49,9 +51,30 @@ public:
     void tumble_die(int value);
     void hide_die();
 
+    // Shows/hides the enemy sprite overlaid on the room background during
+    // combat (Combat::fight) — matches the source project's per-enemy
+    // SpriteAnimations.*() overlay.
+    void show_enemy(EnemyId id);
+    void hide_enemy();
+
+    // Same overlay slot, generalized for a dialogue NPC's portrait
+    // (Dialogue::talk) — combat and dialogue never overlap, so one shared
+    // sprite slot covers both without needing two.
+    void show_overlay_sprite(const bn::sprite_item& item);
+    void hide_overlay_sprite();
+
     // Switches the current room: shows `transition_text` first if non-empty,
     // then the new room's background + description (room.gd's add_path).
     void goto_room(RoomId next, const bn::string_view& transition_text = bn::string_view());
+
+    // For widgets that need to draw their own text outside the normal
+    // text-box/choice-list flow (e.g. SlidingPuzzle's cell cursor) —
+    // sharing this instance instead of constructing another one avoids
+    // duplicating the font's setup for no benefit.
+    bn::sprite_text_generator& text_generator()
+    {
+        return _text_generator;
+    }
 
 private:
     void _enter_room(RoomId id);
@@ -73,6 +96,7 @@ private:
     ui::SidePanel _stats_panel;
     ui::DiceView _dice_view;
     bn::optional<bn::regular_bg_ptr> _background;
+    bn::optional<bn::sprite_ptr> _enemy_sprite;
     RoomId _current_room = RoomId::CellarHall;
     bool _game_over = false;
 

@@ -231,6 +231,35 @@ already shipped in Phase 1, portable/testable/committable on its own:
   documents rooms belong here) and the remaining enemies/dialogue tied to it (the Countess).
 - **4f — Escape endgame.** `is_escaping()` and the living-pursuers chase — its own system,
   and only meaningful once the full map from 4a–4e exists to chase the player across.
+- **4g — Title screen + coach-ride intro.** Phase 3 deliberately shipped with no title/slot
+  screen (single-slot autosave straight into the last room, or a fresh game at Cellar Hall —
+  see that phase's design-decision note); a real main menu (New Game / Continue, and
+  eventually multi-slot once there's enough game to warrant picking a slot) belongs once
+  there's a proper first room to send a "New Game" into. That's the coach-ride opening
+  (`scenes/intro.gd`'s `INTRO_START_COACH`/`INTRO_STOP_COACH`, already flagged as shared canon
+  with `sanguine_gb`'s own intro in the facts table above) landing in ForestCrossing — so this
+  sub-phase depends on 4c's Outside rooms existing, and should follow it rather than come
+  first.
+- **4h — Usable inventory.** Right now the item sidebar (`ui::ItemBar`) only *displays* owned
+  items — potions and the like can only actually be used mid-combat, via `Combat::fight`'s own
+  choice list. Add a real "open inventory" entry point from the room-exploration loop (a new
+  `RoomScreen` method alongside `choose`/`show_text`) that lets the player navigate the item
+  icons directly and select one to consume outside a fight — matching how the source project
+  lets potions/keys/tools be used from the room screen itself, not only from the fight menu.
+  Also the moment to revisit the item sidebar's 4-icon limit flagged back in Phase 1 (smaller
+  icons, or paging) if a floor's ported items ever exceed it.
+- **4i — Enemy overlay scale + movement.** Flagged by the user as future polish once real
+  combat encounters (4b's rat/bats) surfaced the gap: `utils/sprite_animations.gd` gives each
+  small critter both a per-instance scale (the rat renders at `Vector2(2, 2)`, i.e. 2x, since
+  its source art is tiny — `enemy_sprite_item()`/`RoomScreen::show_enemy` currently always
+  draws at native size) and a movement pattern — the rat dashes between floor waypoints
+  (`rat_floor`), while the raven/hungry-bats loop along a figure-eight (Lissajous) path
+  (`mosquito`/`raven_anim`), the raven also cycling a 4-frame flight animation from a 41x41
+  sprite sheet. Porting the scale needs Butano affine sprites (regular sprites can't scale);
+  porting the movement needs a per-frame position update hook during `Combat::fight`'s
+  blocking loop (currently static — `show_enemy` positions once and never moves it), most
+  naturally as a small per-enemy "animator" driven each `bn::core::update()` tick rather than
+  a one-shot tween, since Butano has no tween system of its own.
 
 Enemies and dialogue for a given area are ported alongside that area's own sub-phase (as
 DungeonCreatures/Homunculus were with the Basement in Phases 1–2), not as a separate pass.
