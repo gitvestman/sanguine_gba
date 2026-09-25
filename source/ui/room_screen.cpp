@@ -309,13 +309,35 @@ int RoomScreen::_choose_centered(const bn::ivector<bn::string<40>>& options)
     }
 }
 
+void RoomScreen::_wait_for_a(const bn::string_view& text, bn::fixed y)
+{
+    bn::vector<bn::sprite_ptr, 16> sprites;
+    _text_generator.set_center_alignment();
+    _text_generator.generate(0, y, text, sprites);
+
+    // bn::core::update() must run every iteration, including the one where
+    // it turns out A was pressed (see room_screen.cpp's stale-input lesson
+    // from Phase 1 — checking a_pressed() before ever calling update() this
+    // frame would read whatever press was still latched from before this
+    // screen even started).
+    while(true)
+    {
+        bn::core::update();
+
+        if(bn::keypad::a_pressed())
+        {
+            break;
+        }
+    }
+}
+
 int RoomScreen::show_title_screen(bool has_save)
 {
     set_sidebars_visible(false);
 
     _background.reset();
     _background = bn::regular_bg_items::castle_title.create_bg(0, 0);
-    show_text("Press A to begin.");
+    _wait_for_a("Press A to begin", -50);
 
     _background.reset();
     _background = bn::regular_bg_items::castle_menu.create_bg(0, 0);

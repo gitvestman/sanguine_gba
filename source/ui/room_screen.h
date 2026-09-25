@@ -119,6 +119,12 @@ private:
     // the screen over the art, not in the reserved bottom panel.
     int _choose_centered(const bn::ivector<bn::string<40>>& options);
 
+    // Overlays `text` centered at screen y `y`, with no panel/text-box
+    // backdrop, and blocks until A is pressed — for a prompt drawn directly
+    // over full-screen art (the title card), where the bottom text-box
+    // band would clip the image instead.
+    void _wait_for_a(const bn::string_view& text, bn::fixed y);
+
     bn::sprite_text_generator _text_generator;
     ui::Panel _panel;
     ui::TextBox _text_box;
