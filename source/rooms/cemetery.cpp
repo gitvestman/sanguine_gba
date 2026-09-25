@@ -3,6 +3,8 @@
 #include "../ui/room_screen.h"
 #include "../engine/game_state.h"
 
+#include "bn_sprite_items_npc_myling.h"
+
 namespace sg::rooms
 {
 
@@ -103,9 +105,18 @@ void Cemetery::build_choices(bn::ivector<Choice>& out)
     }
 }
 
-void Cemetery::_resolve_myling()
+void Cemetery::_resolve_myling(RoomScreen& screen)
 {
     _myling_resolved = true;
+    screen.hide_overlay_sprite();
+}
+
+void Cemetery::on_enter(RoomScreen& screen)
+{
+    if(_investigation_started && ! _myling_resolved)
+    {
+        screen.show_overlay_sprite(bn::sprite_items::npc_myling);
+    }
 }
 
 void Cemetery::on_choice(int action_id, RoomScreen& screen)
@@ -145,12 +156,13 @@ void Cemetery::on_choice(int action_id, RoomScreen& screen)
 
     case 6:
         _investigation_started = true;
+        screen.show_overlay_sprite(bn::sprite_items::npc_myling);
         screen.show_text("A soft, wet sobbing rises from among the stones. Something small "
                           "moves between them.");
         break;
 
     case 7:
-        _resolve_myling();
+        _resolve_myling(screen);
         screen.show_text("You decide it's best not to know. You walk on.");
         break;
 
@@ -185,7 +197,7 @@ void Cemetery::on_choice(int action_id, RoomScreen& screen)
 
         if(result == Result::SUCCESS)
         {
-            _resolve_myling();
+            _resolve_myling(screen);
             screen.show_text("You retreat quietly, and the small shape loses interest.");
         }
         else
@@ -243,14 +255,14 @@ void Cemetery::on_choice(int action_id, RoomScreen& screen)
 
     case 14:
         GameState::instance().take_damage(1);
-        _resolve_myling();
+        _resolve_myling(screen);
         screen.show_text("You turn and run, small cold fingers grazing your ankle as you "
                           "go. You take 1 damage.");
         break;
 
     case 23:
         GameState::instance().change_luck(1);
-        _resolve_myling();
+        _resolve_myling(screen);
         screen.show_text("At your own name, the small shape stills, then dissolves into the "
                           "fog, at peace. You feel luckier for it.");
         break;
@@ -261,7 +273,7 @@ void Cemetery::on_choice(int action_id, RoomScreen& screen)
     case 24:
     case 25:
         GameState::instance().take_damage(1);
-        _resolve_myling();
+        _resolve_myling(screen);
         screen.show_text("Wrong. It shrieks and claws at you before vanishing into the fog. "
                           "You take 1 damage.");
         break;
