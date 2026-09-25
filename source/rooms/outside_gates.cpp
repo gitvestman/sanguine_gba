@@ -10,8 +10,9 @@ namespace sg::rooms
 namespace
 {
     constexpr bn::string_view long_description =
-        "The outer gates stand before the winding road home, torches guttering on either "
-        "side.";
+        "A muddy, neglected road leads you to a gate, its torches offering welcome light "
+        "against the looming pines. The opening is narrow, barely wide enough to walk "
+        "through - but it's the only way in.";
     constexpr bn::string_view short_description = "The outer gates.";
     constexpr bn::string_view escape_description =
         "\n\nA coach waits on the road beyond. Something stands between you and it.";

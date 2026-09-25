@@ -134,7 +134,7 @@ private:
     ui::DiceView _dice_view;
     bn::optional<bn::regular_bg_ptr> _background;
     bn::optional<bn::sprite_ptr> _enemy_sprite;
-    RoomId _current_room = RoomId::ForestCrossing;
+    RoomId _current_room = RoomId::OutsideGates;
     bool _game_over = false;
 
     // Previous value of each stat shown in _stats_panel (HP, SAN, LCK, INT,

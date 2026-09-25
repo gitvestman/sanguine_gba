@@ -53,7 +53,7 @@ RoomId SaveGame::load_or_new_game()
 
     if(data.magic != magic)
     {
-        return RoomId::ForestCrossing;
+        return RoomId::OutsideGates;
     }
 
     GameState& game_state = GameState::instance();

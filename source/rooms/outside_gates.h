@@ -4,13 +4,14 @@
 #include "../engine/room.h"
 #include "../engine/enemy.h"
 
-// Ported from D:\Workspace\Godot\sanguine\rooms\outside_gates.gd. The
-// pre-escape flavor content (the multi-step first-visit description, the
-// "look at the castle" scroll effect) is cut — it never mattered
-// mechanically, and the whole point of this room in this build is the
-// escape endgame. During a normal (non-escaping) visit this is just a
-// plain room; once the Countess is dead, reaching here means a final
-// guard (if anything survived) then a win.
+// Ported from D:\Workspace\Godot\sanguine\rooms\outside_gates.gd — the
+// very first room (the coach-ride intro ends here, same as the source
+// project) and, once the Countess is dead, the escape endgame's final
+// room. The source's multi-step first-visit description (two "Continue"
+// presses to reveal the full text) and its "look at the castle" scroll
+// effect are collapsed into one plain description, per user request —
+// the scroll doesn't exist in this port anyway (no continuous background
+// scrolling outside the intro), so there was nothing left to page through.
 namespace sg::rooms
 {
 

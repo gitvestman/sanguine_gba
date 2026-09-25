@@ -32,12 +32,14 @@ int main()
     BN_DATA_EWRAM static sg::RoomScreen screen;
 
     // Phase 4g's title screen: New Game always starts fresh at
-    // ForestCrossing (every room/GameState/Inventory singleton is already
-    // at its just-constructed default — nothing to reset); Continue is
-    // only offered, and only actually loads SRAM, if a save exists.
+    // OutsideGates — the coach-ride intro's actual destination, same as
+    // the source project (every room/GameState/Inventory singleton is
+    // already at its just-constructed default — nothing to reset);
+    // Continue is only offered, and only actually loads SRAM, if a save
+    // exists.
     bool has_save = sg::SaveGame::save_exists();
     int picked = screen.show_title_screen(has_save);
-    sg::RoomId start = sg::RoomId::ForestCrossing;
+    sg::RoomId start = sg::RoomId::OutsideGates;
 
     if(has_save && picked == 1)
     {
