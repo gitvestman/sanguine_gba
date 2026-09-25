@@ -358,13 +358,13 @@ int RoomScreen::show_title_screen(bool has_save)
 void RoomScreen::show_intro()
 {
     // A bigger local backdrop + text box just for the intro's story text
-    // (6 lines instead of the standard 3, over a 64px band instead of
-    // 32px) — the shared _panel/_text_box stay hidden throughout, since
-    // there's no room art to preserve here and a taller box reads better
-    // with fewer page turns.
-    bn::vector<bn::sprite_ptr, 8> intro_panel_tiles;
+    // (9 lines over a 96px band, instead of the standard 3 over 32px) —
+    // the shared _panel/_text_box stay hidden throughout, since there's no
+    // room art to preserve here and a taller box reads more of each page
+    // at once, closer to the source project's own longer intro prose.
+    bn::vector<bn::sprite_ptr, 12> intro_panel_tiles;
     constexpr bn::fixed intro_panel_xs[] = { -96, -32, 32, 96 };
-    constexpr bn::fixed intro_panel_ys[] = { 32, 64 };
+    constexpr bn::fixed intro_panel_ys[] = { 0, 32, 64 };
 
     for(bn::fixed y : intro_panel_ys)
     {
@@ -374,7 +374,7 @@ void RoomScreen::show_intro()
         }
     }
 
-    ui::TextBox intro_text_box(_text_generator, 6, 20);
+    ui::TextBox intro_text_box(_text_generator, 9, -10);
 
     // Background art (castle_menu, already showing from show_title_screen)
     // stays as the backdrop; the tree layers scroll in front of it in
@@ -386,23 +386,30 @@ void RoomScreen::show_intro()
         _background->set_priority(3);
     }
 
-    // Positioned well above the intro's own text backdrop (screen
-    // y:[16,80) — see intro_panel_ys above) so the tallest (nearest) layer
-    // doesn't dip down behind it.
-    bn::regular_bg_ptr trees_far = bn::regular_bg_items::intro_trees_far.create_bg(0, -64);
-    bn::regular_bg_ptr trees_mid = bn::regular_bg_items::intro_trees_mid.create_bg(0, -56);
-    bn::regular_bg_ptr trees_near = bn::regular_bg_items::intro_trees_near.create_bg(0, -48);
+    // Positioned just above the intro's own (now taller) text backdrop
+    // (screen y:[-16,80) — see intro_panel_ys above), each layer's bottom
+    // edge landing a few px shy of that boundary so the nearest (tallest)
+    // layer doesn't dip down behind it.
+    bn::regular_bg_ptr trees_far = bn::regular_bg_items::intro_trees_far.create_bg(0, -38);
+    bn::regular_bg_ptr trees_mid = bn::regular_bg_items::intro_trees_mid.create_bg(0, -46);
+    bn::regular_bg_ptr trees_near = bn::regular_bg_items::intro_trees_near.create_bg(0, -54);
     trees_far.set_priority(2);
     trees_mid.set_priority(1);
     trees_near.set_priority(0);
 
     const bn::string_view pages[] = {
         "The coach rattles down a forgotten road, deep into the mountains, carrying you "
-        "toward a name whispered only in warning.",
+        "toward a name whispered only in warning. Villages thin, then vanish; the trees "
+        "close in, tall and black against a sky gone the color of a bruise.\n\n"
+        "The driver has not spoken in an hour.",
         "The horses grow skittish long before the castle comes into view, as if the road "
-        "itself remembers what waits ahead.",
-        "The coach stops at a crossing in the woods. From here, you go the rest of the way "
-        "on foot."
+        "itself remembers what waits ahead. Somewhere out past the treeline, something answers "
+        "the wind that no wind should.\n\n"
+        "You grip whatever you brought to protect yourself, and try not to think too hard "
+        "about why you came.",
+        "The coach stops at a crossing in the woods, and will go no further. From here, you go "
+        "the rest of the way on foot, alone, with only the moon and your own footsteps for "
+        "company."
     };
 
     bn::fixed far_x;

@@ -26,7 +26,7 @@ public:
     // fewer page turns.
     static constexpr int default_lines_per_page = 3;
     static constexpr bn::fixed default_top_y = 48;
-    static constexpr int max_lines_per_page = 6;
+    static constexpr int max_lines_per_page = 10;
     static constexpr int max_total_lines = 48;
 
     explicit TextBox(bn::sprite_text_generator& generator, int lines_per_page = default_lines_per_page,
