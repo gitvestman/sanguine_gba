@@ -77,7 +77,8 @@ void CliffTombs::on_choice(int action_id, RoomScreen& screen)
             _high_on_cliff = false;
             _climb_resolved = true;
             screen.show_text("You haul yourself up to a narrow window, high on the cliff "
-                              "face - not open in this build yet.");
+                              "face, and climb through.");
+            screen.goto_room(RoomId::Bathroom);
         }
         else
         {

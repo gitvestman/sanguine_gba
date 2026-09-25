@@ -4,11 +4,8 @@
 #include "../engine/room.h"
 
 // Ported from D:\Workspace\Godot\sanguine\rooms\clifftombs.gd. The
-// successful-climb ending (crawling in through a window into Bathroom, a
-// Second Floor room) is stubbed — Phase 4d hasn't ported that floor yet,
-// matching the convention every not-yet-reachable link already uses
-// (StairwayBasement's old "go up" stub, Dungeon's old Prisoner stub,
-// ...). A fatal fall is real: it drops HP to 0, same as any other
+// successful-climb ending (crawling in through a window into Bathroom)
+// is real. A fatal fall is real too: it drops HP to 0, same as any other
 // source of lethal damage.
 namespace sg::rooms
 {

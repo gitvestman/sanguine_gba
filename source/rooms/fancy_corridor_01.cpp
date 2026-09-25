@@ -72,7 +72,7 @@ void FancyCorridor01::on_choice(int action_id, RoomScreen& screen)
     }
 
     case 1:
-        screen.show_text("The passage further north isn't open in this build yet.");
+        screen.goto_room(RoomId::FancyCorridor02);
         break;
 
     case 2:
