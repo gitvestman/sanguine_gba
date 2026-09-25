@@ -99,4 +99,17 @@ void ItemBar::set_items(const bn::ivector<ItemId>& items)
     }
 }
 
+void ItemBar::set_visible(bool visible)
+{
+    for(bn::sprite_ptr& sprite : _background)
+    {
+        sprite.set_visible(visible);
+    }
+
+    for(bn::sprite_ptr& sprite : _icons)
+    {
+        sprite.set_visible(visible);
+    }
+}
+
 }

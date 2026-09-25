@@ -44,6 +44,10 @@ public:
     void set_lines(const bn::ivector<bn::string<4>>& codes, const bn::ivector<bn::string<4>>& values,
                     const bn::ivector<StatFlash>& flashes);
 
+    // Hides/shows the whole panel (backdrop, portrait and current text) —
+    // Phase 4g's title screen/intro hide this until real gameplay starts.
+    void set_visible(bool visible);
+
 private:
     bn::sprite_text_generator& _generator;
     bn::fixed _x;

@@ -32,20 +32,23 @@ class RoomScreen
 public:
     RoomScreen();
 
-    // Phase 4g's title screen: shows the game's name and a New Game/
-    // Continue choice (Continue omitted when `has_save` is false), and
-    // returns 0 for New Game or 1 for Continue. Reuses the same text box/
-    // choice list every other screen in the game uses rather than a
-    // separate title-screen widget — the stat/item sidebars are visible
-    // behind it too (harmless before a save is loaded, if not perfectly
-    // polished — a real title screen without them is future work).
+    // Phase 4g's title screen: the title card (with a "press A" prompt),
+    // then a New Game/Continue menu centered over the plain castle art
+    // (Continue omitted when `has_save` is false) — returns 0 for New Game
+    // or 1 for Continue. The stat/item sidebars are hidden for both this
+    // and show_intro(), and only revealed once real gameplay begins (see
+    // main.cpp) — set_sidebars_visible() does that.
     int show_title_screen(bool has_save);
 
     // The coach-ride opening, shown once on a fresh New Game before the
     // player's first real choice in ForestCrossing. Cut down hard from the
-    // source project's cinematic intro scene (color-shifting sky, sway/
-    // particle effects, gamepad prompts) to the story beats themselves.
+    // source project's cinematic intro scene (color-shifting sky,
+    // gamepad prompts) to the story beats themselves, but keeps its
+    // layered scrolling tree silhouettes (see assets/rooms/intro_trees_*)
+    // as a real parallax effect over the castle art.
     void show_intro();
+
+    void set_sidebars_visible(bool visible);
 
     // Runs the game forever, starting from `start`.
     [[noreturn]] void run(RoomId start);
@@ -109,6 +112,13 @@ private:
     // just halts here permanently once it fires.
     void _check_game_over();
 
+    // Centered New Game/Continue menu for show_title_screen() — a plain
+    // vertical list drawn straight through _text_generator (D-pad up/down,
+    // A confirms), rather than the bottom-band ChoiceList every in-game
+    // choice uses, since a title screen menu wants to sit in the middle of
+    // the screen over the art, not in the reserved bottom panel.
+    int _choose_centered(const bn::ivector<bn::string<40>>& options);
+
     bn::sprite_text_generator _text_generator;
     ui::Panel _panel;
     ui::TextBox _text_box;
@@ -134,6 +144,13 @@ private:
     // _handle_escape_pursuit.
     int _escape_pursuit = 0;
     void _handle_escape_pursuit(bool moved);
+
+    // Phase 4g's title screen/intro hide both sidebars until real gameplay
+    // starts; _refresh_sidebars() re-applies this every time it rebuilds
+    // their sprites (a fresh sprite_ptr always starts out visible, so
+    // without this the very next show_text()/choose() call after hiding
+    // them would silently undo it).
+    bool _sidebars_visible = true;
 };
 
 }

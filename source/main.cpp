@@ -48,5 +48,10 @@ int main()
         screen.show_intro();
     }
 
+    // The stats/item sidebars (including the character portrait) stay
+    // hidden through the title screen and intro — revealed here, right
+    // before real gameplay's first room entry.
+    screen.set_sidebars_visible(true);
+
     screen.run(start);
 }

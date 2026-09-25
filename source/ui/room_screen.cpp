@@ -2,6 +2,7 @@
 
 #include "bn_core.h"
 #include "bn_string.h"
+#include "bn_keypad.h"
 
 #include "common_variable_8x8_sprite_font.h"
 
@@ -11,6 +12,12 @@
 #include "../engine/save_game.h"
 #include "../engine/escape.h"
 #include "../engine/combat.h"
+
+#include "bn_regular_bg_items_castle_title.h"
+#include "bn_regular_bg_items_castle_menu.h"
+#include "bn_regular_bg_items_intro_trees_far.h"
+#include "bn_regular_bg_items_intro_trees_mid.h"
+#include "bn_regular_bg_items_intro_trees_near.h"
 
 namespace sg
 {
@@ -200,6 +207,12 @@ void RoomScreen::_refresh_sidebars()
     bn::vector<ItemId, ui::ItemBar::max_icons> items;
     build_owned_items(items);
     _item_bar.set_items(items);
+
+    if(! _sidebars_visible)
+    {
+        _stats_panel.set_visible(false);
+        _item_bar.set_visible(false);
+    }
 }
 
 void RoomScreen::_enter_room(RoomId id)
@@ -238,9 +251,74 @@ void RoomScreen::_enter_room(RoomId id)
     SaveGame::save(id);
 }
 
+void RoomScreen::set_sidebars_visible(bool visible)
+{
+    _sidebars_visible = visible;
+    _stats_panel.set_visible(visible);
+    _item_bar.set_visible(visible);
+}
+
+int RoomScreen::_choose_centered(const bn::ivector<bn::string<40>>& options)
+{
+    int selected = 0;
+    bn::vector<bn::sprite_ptr, 8 * 4> sprites;
+
+    auto regenerate = [&]
+    {
+        sprites.clear();
+        _text_generator.set_center_alignment();
+
+        bn::fixed top_y = -8 * bn::fixed(options.size() - 1);
+
+        for(int i = 0; i < options.size(); ++i)
+        {
+            bn::string<44> line = (i == selected) ? bn::string<44>("> ") : bn::string<44>("  ");
+            line.append(options[i]);
+            _text_generator.generate(0, top_y + (16 * i), line, sprites);
+        }
+    };
+
+    regenerate();
+
+    while(true)
+    {
+        bool changed = false;
+
+        if(bn::keypad::down_pressed())
+        {
+            selected = (selected + 1) % options.size();
+            changed = true;
+        }
+        else if(bn::keypad::up_pressed())
+        {
+            selected = (selected - 1 + options.size()) % options.size();
+            changed = true;
+        }
+
+        if(changed)
+        {
+            regenerate();
+        }
+
+        bn::core::update();
+
+        if(bn::keypad::a_pressed())
+        {
+            return selected;
+        }
+    }
+}
+
 int RoomScreen::show_title_screen(bool has_save)
 {
-    show_text("SANGUINE\n\nA gothic descent into a castle that should not exist.");
+    set_sidebars_visible(false);
+
+    _background.reset();
+    _background = bn::regular_bg_items::castle_title.create_bg(0, 0);
+    show_text("Press A to begin.");
+
+    _background.reset();
+    _background = bn::regular_bg_items::castle_menu.create_bg(0, 0);
 
     bn::vector<bn::string<40>, 2> labels;
     labels.push_back(bn::string<40>("New Game"));
@@ -250,17 +328,59 @@ int RoomScreen::show_title_screen(bool has_save)
         labels.push_back(bn::string<40>("Continue"));
     }
 
-    return choose(labels);
+    return _choose_centered(labels);
 }
 
 void RoomScreen::show_intro()
 {
-    show_text("The coach rattles down a forgotten road, deep into the mountains, carrying "
-               "you toward a name whispered only in warning.");
-    show_text("The horses grow skittish long before the castle comes into view, as if the "
-               "road itself remembers what waits ahead.");
-    show_text("The coach stops at a crossing in the woods. From here, you go the rest of "
-               "the way on foot.");
+    // Background art (castle_menu, already showing from show_title_screen)
+    // stays as the backdrop; the tree layers scroll in front of it in
+    // increasing priority (lower number = drawn later = closer to the
+    // viewer — see bn_regular_bg_ptr::set_priority) for a parallax depth
+    // effect, matching the source project's three tree_lagerNN layers.
+    if(_background)
+    {
+        _background->set_priority(3);
+    }
+
+    bn::regular_bg_ptr trees_far = bn::regular_bg_items::intro_trees_far.create_bg(0, 10);
+    bn::regular_bg_ptr trees_mid = bn::regular_bg_items::intro_trees_mid.create_bg(0, 20);
+    bn::regular_bg_ptr trees_near = bn::regular_bg_items::intro_trees_near.create_bg(0, 30);
+    trees_far.set_priority(2);
+    trees_mid.set_priority(1);
+    trees_near.set_priority(0);
+
+    const bn::string_view pages[] = {
+        "The coach rattles down a forgotten road, deep into the mountains, carrying you "
+        "toward a name whispered only in warning.",
+        "The horses grow skittish long before the castle comes into view, as if the road "
+        "itself remembers what waits ahead.",
+        "The coach stops at a crossing in the woods. From here, you go the rest of the way "
+        "on foot."
+    };
+
+    bn::fixed far_x;
+    bn::fixed mid_x;
+    bn::fixed near_x;
+
+    for(const bn::string_view& page : pages)
+    {
+        _refresh_sidebars();
+        _text_box.show(page);
+
+        while(_text_box.active())
+        {
+            far_x -= 0.2;
+            mid_x -= 0.5;
+            near_x -= 1;
+            trees_far.set_x(far_x);
+            trees_mid.set_x(mid_x);
+            trees_near.set_x(near_x);
+
+            _text_box.update();
+            bn::core::update();
+        }
+    }
 }
 
 void RoomScreen::run(RoomId start)

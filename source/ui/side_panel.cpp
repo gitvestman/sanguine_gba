@@ -113,4 +113,19 @@ void SidePanel::set_lines(const bn::ivector<bn::string<4>>& codes, const bn::ive
     }
 }
 
+void SidePanel::set_visible(bool visible)
+{
+    for(bn::sprite_ptr& sprite : _background)
+    {
+        sprite.set_visible(visible);
+    }
+
+    _portrait.set_visible(visible);
+
+    for(bn::sprite_ptr& sprite : _text_sprites)
+    {
+        sprite.set_visible(visible);
+    }
+}
+
 }

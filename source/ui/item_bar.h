@@ -25,6 +25,10 @@ public:
 
     void set_items(const bn::ivector<ItemId>& items);
 
+    // Hides/shows the whole bar (backdrop and current icons) — Phase 4g's
+    // title screen/intro hide this until real gameplay starts.
+    void set_visible(bool visible);
+
 private:
     bn::fixed _x;
     bn::vector<bn::sprite_ptr, 2> _background;
