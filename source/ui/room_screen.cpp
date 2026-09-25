@@ -386,9 +386,12 @@ void RoomScreen::show_intro()
         _background->set_priority(3);
     }
 
-    bn::regular_bg_ptr trees_far = bn::regular_bg_items::intro_trees_far.create_bg(0, 10);
-    bn::regular_bg_ptr trees_mid = bn::regular_bg_items::intro_trees_mid.create_bg(0, 20);
-    bn::regular_bg_ptr trees_near = bn::regular_bg_items::intro_trees_near.create_bg(0, 30);
+    // Positioned well above the intro's own text backdrop (screen
+    // y:[16,80) — see intro_panel_ys above) so the tallest (nearest) layer
+    // doesn't dip down behind it.
+    bn::regular_bg_ptr trees_far = bn::regular_bg_items::intro_trees_far.create_bg(0, -64);
+    bn::regular_bg_ptr trees_mid = bn::regular_bg_items::intro_trees_mid.create_bg(0, -56);
+    bn::regular_bg_ptr trees_near = bn::regular_bg_items::intro_trees_near.create_bg(0, -48);
     trees_far.set_priority(2);
     trees_mid.set_priority(1);
     trees_near.set_priority(0);
