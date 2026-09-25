@@ -16,6 +16,8 @@ namespace
         GIVE_NAME,
         ASK_QUESTION,
         LEAVE,
+        DINNER_ACCEPT,
+        DINNER_DECLINE,
         LET_PASS,
         ATTACK_BEHIND
     };
@@ -39,8 +41,13 @@ void Countess::initialize_choices()
                  "\"This place has stood for centuries, and will stand for many more.\" She "
                  "watches you a moment too long.",
                  DialogueChoiceType::ONCE, true);
-    add_dialogue(LEAVE, "Take your leave", "\"Already? A shame.\" She steps aside, but her "
-                                           "eyes never leave you.",
+    add_dialogue(LEAVE, "Take your leave",
+                 "\"Already? Nonsense. You'll dine with me before you go anywhere.\"",
+                 DialogueChoiceType::ONCE, true);
+    add_quit(DINNER_ACCEPT, "Accept the invitation",
+             "\"Wonderful,\" she says, already turning toward the dining hall.", true);
+    add_dialogue(DINNER_DECLINE, "\"Respectfully, I must decline.\"",
+                 "\"A pity.\" She studies you a moment longer.",
                  DialogueChoiceType::ONCE, true);
     add_quit(LET_PASS, "Let her go", "You lower your guard and let her pass.", true);
     add_quit(ATTACK_BEHIND, "Attack from behind", "You strike as she turns away.", true);
@@ -63,6 +70,15 @@ void Countess::on_choice_selected(int id, RoomScreen& screen)
         break;
 
     case LEAVE:
+        show_dialogue(DINNER_ACCEPT);
+        show_dialogue(DINNER_DECLINE);
+        break;
+
+    case DINNER_ACCEPT:
+        _dinner_pending = true;
+        break;
+
+    case DINNER_DECLINE:
         show_dialogue(LET_PASS);
         show_dialogue(ATTACK_BEHIND);
         break;

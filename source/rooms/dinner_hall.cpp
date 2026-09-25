@@ -2,6 +2,10 @@
 
 #include "../ui/room_screen.h"
 #include "../engine/game_state.h"
+#include "../engine/combat.h"
+#include "fancy_corridor_01.h"
+
+#include "bn_sprite_items_enemy_countess.h"
 
 namespace sg::rooms
 {
@@ -12,16 +16,49 @@ namespace
         "The ruined dining hall reeks of old grease and violence. A crushing dread grips "
         "your soul.";
     constexpr bn::string_view short_description = "The dining hall.";
+
+    dialogue::Countess& countess()
+    {
+        return static_cast<FancyCorridor01&>(room(RoomId::FancyCorridor01)).countess();
+    }
+
+    bool dinner_active()
+    {
+        return countess().dinner_pending() && ! enemy(EnemyId::Countess).is_dead();
+    }
 }
 
 void DinnerHall::describe(bn::string<768>& out, bool force_long)
 {
+    if(dinner_active())
+    {
+        out.append("The Countess waits at the head of a lavishly set table, a single "
+                    "place laid across from her.");
+        visited = true;
+        return;
+    }
+
     out.append((! force_long && visited) ? short_description : long_description);
     visited = true;
 }
 
+void DinnerHall::on_enter(RoomScreen& screen)
+{
+    if(dinner_active())
+    {
+        screen.show_overlay_sprite(bn::sprite_items::enemy_countess);
+    }
+}
+
 void DinnerHall::build_choices(bn::ivector<Choice>& out)
 {
+    if(dinner_active())
+    {
+        out.push_back({ "Attack her", 6 });
+        out.push_back({ "Dine with her", 7 });
+        return;
+    }
+
     if(! _trap_sprung)
     {
         out.push_back({ "Resist the dread", 1 });
@@ -85,6 +122,30 @@ void DinnerHall::on_choice(int action_id, RoomScreen& screen)
     case 5:
         _searched = true;
         screen.show_text("Broken chairs and mildewed linen. Nothing worth taking.");
+        break;
+
+    case 6:
+        screen.hide_overlay_sprite();
+        screen.show_text("You overturn the table and lunge at her.");
+        Combat::fight(screen, EnemyId::Countess);
+        countess().set_dinner_pending(false);
+
+        if(enemy(EnemyId::Countess).is_dead())
+        {
+            countess().set_resolved(true);
+        }
+
+        break;
+
+    case 7:
+        screen.hide_overlay_sprite();
+        countess().set_dinner_pending(false);
+        countess().set_resolved(true);
+        GameState::instance().change_sanity(1);
+        screen.show_text("You dine with her, trading pleasantries you don't mean over a "
+                          "meal you don't taste. When it's done, she retires without a "
+                          "word, seemingly satisfied. You feel steadier for having survived "
+                          "it.");
         break;
 
     default:

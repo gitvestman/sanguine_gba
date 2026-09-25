@@ -23,6 +23,15 @@ public:
     uint16_t save_state() const override;
     void load_state(uint16_t bits) override;
 
+    // Cross-room access for DinnerHall, which needs to read/resolve the
+    // same Countess encounter once a dinner invitation sends her there —
+    // matching the pattern every other cross-room state read in this
+    // build already uses (CellarHall::north_secret_door_found, etc.).
+    dialogue::Countess& countess()
+    {
+        return _countess;
+    }
+
 private:
     bool _countess_met = false;
     dialogue::Countess _countess;

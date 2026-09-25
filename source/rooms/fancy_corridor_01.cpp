@@ -13,9 +13,13 @@ namespace
         "A fancy corridor lined with faded tapestries. Doors lead in every direction.";
     constexpr bn::string_view short_description = "The fancy corridor.";
 
+    // False once she's gone (dead, let go peacefully, or off waiting in
+    // DinnerHall for a dinner she was invited to) — any of those means
+    // she's no longer lingering in this corridor.
     bool countess_active(const dialogue::Countess& countess)
     {
-        return ! enemy(EnemyId::Countess).is_dead() && ! countess.resolved();
+        return ! enemy(EnemyId::Countess).is_dead() && ! countess.resolved() &&
+               ! countess.dinner_pending();
     }
 }
 
@@ -113,6 +117,7 @@ uint16_t FancyCorridor01::save_state() const
     uint16_t bits = Room::save_state();
     if(_countess_met) bits |= 1 << 1;
     if(_countess.resolved()) bits |= 1 << 2;
+    if(_countess.dinner_pending()) bits |= 1 << 3;
     return bits;
 }
 
@@ -121,6 +126,7 @@ void FancyCorridor01::load_state(uint16_t bits)
     Room::load_state(bits);
     _countess_met = bits & (1 << 1);
     _countess.set_resolved(bits & (1 << 2));
+    _countess.set_dinner_pending(bits & (1 << 3));
 }
 
 }
