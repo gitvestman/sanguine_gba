@@ -79,7 +79,7 @@ void TrophyRoom::on_choice(int action_id, RoomScreen& screen)
             {
                 _tried_antlers = true;
                 screen.show_text("One set of antlers wobbles slightly at your touch, as if "
-                                  "hinged — but nothing else happens.");
+                                  "hinged - but nothing else happens.");
             }
         }
         else

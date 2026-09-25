@@ -13,7 +13,7 @@ namespace
         "A row of tombs built into the cliff face, each carved with Christian iconography "
         "around an iron gate.";
     constexpr bn::string_view short_description = "The cliff tombs.";
-    constexpr bn::string_view found_hidden_hint = "\n\nOne gate hangs loose — a hidden way "
+    constexpr bn::string_view found_hidden_hint = "\n\nOne gate hangs loose - a hidden way "
                                                   "through, back into the castle's cellar.";
 }
 
@@ -77,7 +77,7 @@ void CliffTombs::on_choice(int action_id, RoomScreen& screen)
             _high_on_cliff = false;
             _climb_resolved = true;
             screen.show_text("You haul yourself up to a narrow window, high on the cliff "
-                              "face — not open in this build yet.");
+                              "face - not open in this build yet.");
         }
         else
         {

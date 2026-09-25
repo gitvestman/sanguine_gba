@@ -78,7 +78,7 @@ void Mausoleum::on_choice(int action_id, RoomScreen& screen)
             else
             {
                 _item_found = true;
-                screen.show_text("The lid grinds aside. Something glints among the bones — a "
+                screen.show_text("The lid grinds aside. Something glints among the bones - a "
                                   "silver dagger.");
             }
         }

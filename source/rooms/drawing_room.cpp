@@ -122,7 +122,7 @@ void DrawingRoom::on_choice(int action_id, RoomScreen& screen)
 
     case 4:
         _greeted = true;
-        screen.show_text("You speak softly to it. It doesn't flee — if anything, it seems "
+        screen.show_text("You speak softly to it. It doesn't flee - if anything, it seems "
                           "to be listening.");
         break;
 
@@ -134,7 +134,7 @@ void DrawingRoom::on_choice(int action_id, RoomScreen& screen)
         if(result == Result::SUCCESS)
         {
             _identify_success = true;
-            screen.show_text("It isn't quite a raven at all — something stranger, drawn to "
+            screen.show_text("It isn't quite a raven at all - something stranger, drawn to "
                               "bright, shiny things.");
         }
         else

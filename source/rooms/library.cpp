@@ -70,7 +70,7 @@ void Library::on_choice(int action_id, RoomScreen& screen)
 
     case 3:
         _passage_found = true;
-        screen.show_text("Pulling the book releases a hidden latch — a passage opens to the "
+        screen.show_text("Pulling the book releases a hidden latch - a passage opens to the "
                           "north.");
         break;
 

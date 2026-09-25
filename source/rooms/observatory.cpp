@@ -51,7 +51,7 @@ void Observatory::on_choice(int action_id, RoomScreen& screen)
         break;
 
     case 3:
-        screen.show_text("Through the telescope, the night sky looks wrong somehow — the "
+        screen.show_text("Through the telescope, the night sky looks wrong somehow - the "
                           "stars in the wrong places entirely.");
         break;
 

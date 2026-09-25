@@ -68,7 +68,7 @@ void ChildrensRoom::on_choice(int action_id, RoomScreen& screen)
     case 2:
         _drawing_found = true;
         screen.show_text("Among faded picture books, a child's drawing lies folded between "
-                          "the pages — a woman with too many teeth, smiling.");
+                          "the pages - a woman with too many teeth, smiling.");
         break;
 
     case 3:
