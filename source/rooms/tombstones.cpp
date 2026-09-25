@@ -68,7 +68,8 @@ void Tombstones::on_choice(int action_id, RoomScreen& screen)
     }
 
     case 3:
-        screen.show_text("The names are worn smooth, barely legible in the moonlight.");
+        screen.show_text("The stones are humble but well-made. Both names are still clearly "
+                          "legible: Olivia and Elena Lupescu.");
         break;
 
     default:
