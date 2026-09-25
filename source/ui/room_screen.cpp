@@ -390,9 +390,9 @@ void RoomScreen::show_intro()
     // (screen y:[-16,80) — see intro_panel_ys above), each layer's bottom
     // edge landing a few px shy of that boundary so the nearest (tallest)
     // layer doesn't dip down behind it.
-    bn::regular_bg_ptr trees_far = bn::regular_bg_items::intro_trees_far.create_bg(0, -38);
-    bn::regular_bg_ptr trees_mid = bn::regular_bg_items::intro_trees_mid.create_bg(0, -46);
-    bn::regular_bg_ptr trees_near = bn::regular_bg_items::intro_trees_near.create_bg(0, -54);
+    bn::regular_bg_ptr trees_far = bn::regular_bg_items::intro_trees_far.create_bg(0, -36);
+    bn::regular_bg_ptr trees_mid = bn::regular_bg_items::intro_trees_mid.create_bg(0, -44);
+    bn::regular_bg_ptr trees_near = bn::regular_bg_items::intro_trees_near.create_bg(0, -52);
     trees_far.set_priority(2);
     trees_mid.set_priority(1);
     trees_near.set_priority(0);
