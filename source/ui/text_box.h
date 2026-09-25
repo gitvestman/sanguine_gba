@@ -20,11 +20,17 @@ public:
     // 3 content lines + 1 hint line fill the 32px bottom panel band exactly
     // (see ui/panel.cpp) — smaller than the vertical slice's first pass so
     // more of the room art stays visible; long descriptions just take a few
-    // more "A: More..." pages to get through.
-    static constexpr int max_lines_per_page = 3;
+    // more "A: More..." pages to get through. Phase 4g's intro uses a taller
+    // instance (top_y/lines_per_page passed explicitly) over its own bigger
+    // backdrop, since it has no room art to preserve and reads better with
+    // fewer page turns.
+    static constexpr int default_lines_per_page = 3;
+    static constexpr bn::fixed default_top_y = 48;
+    static constexpr int max_lines_per_page = 6;
     static constexpr int max_total_lines = 48;
 
-    explicit TextBox(bn::sprite_text_generator& generator);
+    explicit TextBox(bn::sprite_text_generator& generator, int lines_per_page = default_lines_per_page,
+                      bn::fixed top_y = default_top_y);
 
     // Word-wraps and paginates `text`, then displays its first page.
     void show(const bn::string_view& text);
@@ -43,8 +49,10 @@ private:
     void _show_page(int page_index);
 
     bn::sprite_text_generator& _generator;
+    int _lines_per_page;
+    bn::fixed _top_y;
     bn::vector<bn::string<48>, max_total_lines> _lines;
-    bn::vector<bn::sprite_ptr, 96> _sprites;
+    bn::vector<bn::sprite_ptr, max_lines_per_page * 40> _sprites;
     int _line_count = 0;
     int _page = 0;
     int _page_count = 0;

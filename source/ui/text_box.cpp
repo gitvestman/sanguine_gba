@@ -9,8 +9,6 @@ namespace sg::ui
 namespace
 {
     constexpr bn::fixed text_x = -112;
-    // Top of the 32px bottom panel band (screen y:[48,80) — see ui/panel.cpp).
-    constexpr bn::fixed text_top_y = 48;
     constexpr bn::fixed line_height = 8;
     constexpr int max_width_px = 224;
 
@@ -97,8 +95,10 @@ namespace
     }
 }
 
-TextBox::TextBox(bn::sprite_text_generator& generator) :
-    _generator(generator)
+TextBox::TextBox(bn::sprite_text_generator& generator, int lines_per_page, bn::fixed top_y) :
+    _generator(generator),
+    _lines_per_page(lines_per_page),
+    _top_y(top_y)
 {
 }
 
@@ -108,7 +108,7 @@ void TextBox::show(const bn::string_view& text)
     wrap_text(_generator, text, _lines);
     _line_count = _lines.size();
 
-    _page_count = bn::max((_line_count + max_lines_per_page - 1) / max_lines_per_page, 1);
+    _page_count = bn::max((_line_count + _lines_per_page - 1) / _lines_per_page, 1);
     _page = 0;
     _active = true;
     _show_page(_page);
@@ -126,16 +126,16 @@ void TextBox::_show_page(int page_index)
     // height itself instead of relying on it.
     constexpr bn::fixed half_glyph_height = 4;
 
-    int first_line = page_index * max_lines_per_page;
-    int last_line = bn::min(first_line + max_lines_per_page, _line_count);
+    int first_line = page_index * _lines_per_page;
+    int last_line = bn::min(first_line + _lines_per_page, _line_count);
 
     for(int i = first_line; i < last_line; ++i)
     {
-        bn::fixed y = text_top_y + bn::fixed((i - first_line) * int(line_height)) + half_glyph_height;
+        bn::fixed y = _top_y + bn::fixed((i - first_line) * int(line_height)) + half_glyph_height;
         _generator.generate(text_x, y, _lines[i], _sprites);
     }
 
-    bn::fixed hint_y = text_top_y + bn::fixed(max_lines_per_page * int(line_height)) + half_glyph_height;
+    bn::fixed hint_y = _top_y + bn::fixed(_lines_per_page * int(line_height)) + half_glyph_height;
     bn::string_view hint = (page_index + 1 < _page_count) ? "> A: More..." : "> A: Continue";
     _generator.generate(text_x, hint_y, hint, _sprites);
 }

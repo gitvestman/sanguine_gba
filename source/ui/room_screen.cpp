@@ -13,6 +13,7 @@
 #include "../engine/escape.h"
 #include "../engine/combat.h"
 
+#include "bn_sprite_items_panel_tile.h"
 #include "bn_regular_bg_items_castle_title.h"
 #include "bn_regular_bg_items_castle_menu.h"
 #include "bn_regular_bg_items_intro_trees_far.h"
@@ -356,11 +357,24 @@ int RoomScreen::show_title_screen(bool has_save)
 
 void RoomScreen::show_intro()
 {
-    // Sidebars/portrait stay hidden (still no real game state to show
-    // yet), but the intro's story text needs the bottom panel's backdrop
-    // to stay legible — show_title_screen() hid it along with everything
-    // else.
-    _panel.set_visible(true);
+    // A bigger local backdrop + text box just for the intro's story text
+    // (6 lines instead of the standard 3, over a 64px band instead of
+    // 32px) — the shared _panel/_text_box stay hidden throughout, since
+    // there's no room art to preserve here and a taller box reads better
+    // with fewer page turns.
+    bn::vector<bn::sprite_ptr, 8> intro_panel_tiles;
+    constexpr bn::fixed intro_panel_xs[] = { -96, -32, 32, 96 };
+    constexpr bn::fixed intro_panel_ys[] = { 32, 64 };
+
+    for(bn::fixed y : intro_panel_ys)
+    {
+        for(bn::fixed x : intro_panel_xs)
+        {
+            intro_panel_tiles.push_back(bn::sprite_items::panel_tile.create_sprite(x, y));
+        }
+    }
+
+    ui::TextBox intro_text_box(_text_generator, 6, 20);
 
     // Background art (castle_menu, already showing from show_title_screen)
     // stays as the backdrop; the tree layers scroll in front of it in
@@ -394,19 +408,18 @@ void RoomScreen::show_intro()
 
     for(const bn::string_view& page : pages)
     {
-        _refresh_sidebars();
-        _text_box.show(page);
+        intro_text_box.show(page);
 
-        while(_text_box.active())
+        while(intro_text_box.active())
         {
-            far_x -= 0.2;
-            mid_x -= 0.5;
-            near_x -= 1;
+            far_x -= 0.05;
+            mid_x -= 0.125;
+            near_x -= 0.25;
             trees_far.set_x(far_x);
             trees_mid.set_x(mid_x);
             trees_near.set_x(near_x);
 
-            _text_box.update();
+            intro_text_box.update();
             bn::core::update();
         }
     }
