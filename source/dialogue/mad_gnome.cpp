@@ -23,7 +23,7 @@ namespace
 void MadGnome::initialize_choices()
 {
     add_dialogue(PARDON, "\"I beg your pardon?\"",
-                 "\"Rørt ved mine grøntsager?\" the voice snarls, still hidden in the bush.");
+                 "\"Touched my vegetables?\" the voice snarls, still hidden in the bush.");
     add_dialogue(GERMAN, "Greet him in German",
                  "The voice pauses, confused, then snarls back in the same broken tongue.");
 
