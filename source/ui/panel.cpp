@@ -23,4 +23,12 @@ Panel::Panel()
     }
 }
 
+void Panel::set_visible(bool visible)
+{
+    for(bn::sprite_ptr& tile : _tiles)
+    {
+        tile.set_visible(visible);
+    }
+}
+
 }

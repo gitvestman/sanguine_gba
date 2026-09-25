@@ -18,6 +18,12 @@ class Panel
 public:
     Panel();
 
+    // Phase 4g's title screen/intro hide this too — otherwise the bottom
+    // band's solid backdrop clips 32px off the bottom of full-screen art
+    // that has nothing else to do with the panel (the title card, the
+    // castle menu art).
+    void set_visible(bool visible);
+
 private:
     bn::vector<bn::sprite_ptr, 4> _tiles;
 };

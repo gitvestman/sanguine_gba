@@ -256,6 +256,7 @@ void RoomScreen::set_sidebars_visible(bool visible)
     _sidebars_visible = visible;
     _stats_panel.set_visible(visible);
     _item_bar.set_visible(visible);
+    _panel.set_visible(visible);
 }
 
 int RoomScreen::_choose_centered(const bn::ivector<bn::string<40>>& options)
@@ -355,6 +356,12 @@ int RoomScreen::show_title_screen(bool has_save)
 
 void RoomScreen::show_intro()
 {
+    // Sidebars/portrait stay hidden (still no real game state to show
+    // yet), but the intro's story text needs the bottom panel's backdrop
+    // to stay legible — show_title_screen() hid it along with everything
+    // else.
+    _panel.set_visible(true);
+
     // Background art (castle_menu, already showing from show_title_screen)
     // stays as the backdrop; the tree layers scroll in front of it in
     // increasing priority (lower number = drawn later = closer to the
