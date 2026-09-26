@@ -4,6 +4,7 @@
 #include "ui/room_screen.h"
 #include "engine/rng.h"
 #include "engine/save_game.h"
+#include "engine/inventory.h"
 
 int main()
 {
@@ -47,6 +48,11 @@ int main()
     }
     else
     {
+        // Matches the source project's starting bag (character_select_
+        // room.gd's CHARACTER_SELECT_FLINTLOCK_DESCRIPTION) — every
+        // character in this build carries the pistol, since there's no
+        // character-select step here to choose a different starting item.
+        sg::Inventory::instance().add(sg::ItemId::FLINTLOCK);
         screen.show_intro();
     }
 

@@ -69,4 +69,10 @@ void GreatHall::on_choice(int action_id, RoomScreen& screen)
     }
 }
 
+void GreatHall::build_ambient(bn::ivector<AmbientDecor>& out) const
+{
+    out.push_back({ AmbientKind::CANDLE, -65, -25 });
+    out.push_back({ AmbientKind::CANDLE, 65, -25 });
+}
+
 }

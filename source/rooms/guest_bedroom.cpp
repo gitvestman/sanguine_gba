@@ -52,4 +52,9 @@ void GuestBedroom::on_choice(int action_id, RoomScreen& screen)
     }
 }
 
+void GuestBedroom::build_ambient(bn::ivector<AmbientDecor>& out) const
+{
+    out.push_back({ AmbientKind::CANDLE, 64, -24 });
+}
+
 }

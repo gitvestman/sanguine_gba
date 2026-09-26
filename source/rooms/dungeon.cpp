@@ -157,6 +157,11 @@ void Dungeon::on_choice(int action_id, RoomScreen& screen)
     }
 }
 
+void Dungeon::build_ambient(bn::ivector<AmbientDecor>& out) const
+{
+    out.push_back({ AmbientKind::TORCH, 0, -20 });
+}
+
 uint16_t Dungeon::save_state() const
 {
     uint16_t bits = Room::save_state();

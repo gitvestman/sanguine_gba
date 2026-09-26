@@ -98,6 +98,12 @@ void Stairway2ndFloor::on_choice(int action_id, RoomScreen& screen)
     }
 }
 
+void Stairway2ndFloor::build_ambient(bn::ivector<AmbientDecor>& out) const
+{
+    out.push_back({ AmbientKind::TORCH, -40, -20 });
+    out.push_back({ AmbientKind::TORCH, 40, -20 });
+}
+
 uint16_t Stairway2ndFloor::save_state() const
 {
     uint16_t bits = Room::save_state();

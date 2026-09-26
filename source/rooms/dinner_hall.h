@@ -22,6 +22,7 @@ public:
     void build_choices(bn::ivector<Choice>& out) override;
     void on_choice(int action_id, RoomScreen& screen) override;
     void on_enter(RoomScreen& screen) override;
+    void build_ambient(bn::ivector<AmbientDecor>& out) const override;
     uint16_t save_state() const override;
     void load_state(uint16_t bits) override;
 

@@ -153,6 +153,13 @@ void DinnerHall::on_choice(int action_id, RoomScreen& screen)
     }
 }
 
+void DinnerHall::build_ambient(bn::ivector<AmbientDecor>& out) const
+{
+    out.push_back({ AmbientKind::CANDLE, -10, -49 });
+    out.push_back({ AmbientKind::CANDLE, 0, -49 });
+    out.push_back({ AmbientKind::CANDLE, 10, -49 });
+}
+
 uint16_t DinnerHall::save_state() const
 {
     uint16_t bits = Room::save_state();

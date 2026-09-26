@@ -31,6 +31,14 @@ void KitchenCellar::describe(bn::string<768>& out, bool force_long)
     }
 }
 
+void KitchenCellar::on_enter(RoomScreen& screen)
+{
+    if(_rat_active())
+    {
+        screen.show_enemy(EnemyId::Rat);
+    }
+}
+
 void KitchenCellar::build_choices(bn::ivector<Choice>& out)
 {
     out.push_back({ "Look", 0 });
@@ -71,11 +79,23 @@ void KitchenCellar::on_choice(int action_id, RoomScreen& screen)
 
     case 4:
         Combat::fight(screen, EnemyId::Rat);
+
+        if(_rat_active())
+        {
+            screen.show_enemy(EnemyId::Rat);
+        }
+
         break;
 
     default:
         break;
     }
+}
+
+void KitchenCellar::build_ambient(bn::ivector<AmbientDecor>& out) const
+{
+    out.push_back({ AmbientKind::TORCH, -78, -20 });
+    out.push_back({ AmbientKind::TORCH, 75, -20 });
 }
 
 uint16_t KitchenCellar::save_state() const

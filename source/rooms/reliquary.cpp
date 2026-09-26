@@ -108,6 +108,16 @@ void Reliquary::on_choice(int action_id, RoomScreen& screen)
     }
 }
 
+void Reliquary::build_ambient(bn::ivector<AmbientDecor>& out) const
+{
+    out.push_back({ AmbientKind::CANDLE, -75, -46 });
+    out.push_back({ AmbientKind::CANDLE, -65, -46 });
+    out.push_back({ AmbientKind::CANDLE, -55, -46 });
+    out.push_back({ AmbientKind::CANDLE, 55, -46 });
+    out.push_back({ AmbientKind::CANDLE, 65, -46 });
+    out.push_back({ AmbientKind::CANDLE, 75, -46 });
+}
+
 uint16_t Reliquary::save_state() const
 {
     uint16_t bits = Room::save_state();

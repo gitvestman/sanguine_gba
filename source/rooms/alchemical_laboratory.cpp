@@ -81,6 +81,11 @@ void AlchemicalLaboratory::on_choice(int action_id, RoomScreen& screen)
     }
 }
 
+void AlchemicalLaboratory::build_ambient(bn::ivector<AmbientDecor>& out) const
+{
+    out.push_back({ AmbientKind::CANDLE, 24, -6 });
+}
+
 uint16_t AlchemicalLaboratory::save_state() const
 {
     uint16_t bits = Room::save_state();

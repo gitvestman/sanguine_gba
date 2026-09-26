@@ -36,6 +36,19 @@ namespace
         return grid_top + cell_size * row + cell_size / 2;
     }
 
+    // The true solved layout, per the source project's puzzle.gd
+    // (solved_state = [1, 0, 2, 3, 4, 5, 6, 7]) — confirmed by diffing
+    // graphics/puzzle/komplett.png (the assembled picture) against each
+    // tile{N}.png fragment cell by cell: tile1 sits top-left, the gap is
+    // top-RIGHT (index 1, not the last cell), and tile2..tile7 fill the
+    // rest in reading order after that. Getting this wrong doesn't just
+    // look off — a sliding puzzle's legal moves only ever reach permutations
+    // in the same parity class as whatever state you scramble from, so
+    // scrambling from the wrong "solved" layout (as this code used to,
+    // assuming the gap was last) made the actual correct picture
+    // unreachable, not merely mislabeled.
+    constexpr uint8_t solved_layout[8] = { 1, 0, 2, 3, 4, 5, 6, 7 };
+
     bn::sprite_item tile_item(int tile_id)
     {
         switch(tile_id)
@@ -75,14 +88,12 @@ void SlidingPuzzle::_scramble_if_needed()
 
     _cells.clear();
 
-    for(int i = 0; i < cell_count - 1; ++i)
+    for(uint8_t v : solved_layout)
     {
-        _cells.push_back(uint8_t(i + 1));
+        _cells.push_back(v);
     }
 
-    _cells.push_back(0);
-
-    int empty_index = cell_count - 1;
+    int empty_index = 1;
 
     // Perform a long run of random *valid* slides from the solved state
     // rather than a random permutation — an 8-piece sliding puzzle is only
@@ -157,9 +168,9 @@ void SlidingPuzzle::_update_cursor(bn::sprite_text_generator& generator)
 
 bool SlidingPuzzle::_solved() const
 {
-    for(int i = 0; i < cell_count - 1; ++i)
+    for(int i = 0; i < cell_count; ++i)
     {
-        if(_cells[i] != i + 1)
+        if(_cells[i] != solved_layout[i])
         {
             return false;
         }

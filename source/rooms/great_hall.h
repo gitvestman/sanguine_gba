@@ -16,6 +16,7 @@ public:
     void describe(bn::string<768>& out, bool force_long = false) override;
     void build_choices(bn::ivector<Choice>& out) override;
     void on_choice(int action_id, RoomScreen& screen) override;
+    void build_ambient(bn::ivector<AmbientDecor>& out) const override;
 };
 
 }

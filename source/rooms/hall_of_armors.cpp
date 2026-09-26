@@ -114,6 +114,12 @@ void HallOfArmors::_maybe_trigger_trap(int exit_side, RoomScreen& screen)
     _trap_sprung = true;
 }
 
+void HallOfArmors::build_ambient(bn::ivector<AmbientDecor>& out) const
+{
+    out.push_back({ AmbientKind::TORCH, -40, -40 });
+    out.push_back({ AmbientKind::TORCH, 40, -40 });
+}
+
 uint16_t HallOfArmors::save_state() const
 {
     uint16_t bits = Room::save_state();

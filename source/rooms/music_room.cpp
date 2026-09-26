@@ -70,6 +70,12 @@ void MusicRoom::on_choice(int action_id, RoomScreen& screen)
     }
 }
 
+void MusicRoom::build_ambient(bn::ivector<AmbientDecor>& out) const
+{
+    out.push_back({ AmbientKind::CANDLE, -35, -22 });
+    out.push_back({ AmbientKind::CANDLE, 35, -22 });
+}
+
 uint16_t MusicRoom::save_state() const
 {
     uint16_t bits = Room::save_state();

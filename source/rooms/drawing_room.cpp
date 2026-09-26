@@ -3,6 +3,8 @@
 #include "../ui/room_screen.h"
 #include "../engine/combat.h"
 
+#include "bn_sprite_items_enemy_night_raven.h"
+
 namespace sg::rooms
 {
 
@@ -43,6 +45,14 @@ void DrawingRoom::describe(bn::string<768>& out, bool force_long)
     }
 
     visited = true;
+}
+
+void DrawingRoom::on_enter(RoomScreen& screen)
+{
+    if(! raven_resolved(_raven_gone))
+    {
+        screen.show_overlay_sprite(bn::sprite_items::enemy_night_raven);
+    }
 }
 
 void DrawingRoom::build_choices(bn::ivector<Choice>& out)
@@ -118,6 +128,12 @@ void DrawingRoom::on_choice(int action_id, RoomScreen& screen)
 
     case 3:
         Combat::fight(screen, EnemyId::NightRaven);
+
+        if(! enemy(EnemyId::NightRaven).is_dead())
+        {
+            screen.show_overlay_sprite(bn::sprite_items::enemy_night_raven);
+        }
+
         break;
 
     case 4:
@@ -147,6 +163,7 @@ void DrawingRoom::on_choice(int action_id, RoomScreen& screen)
 
     case 6:
         _raven_gone = true;
+        screen.hide_overlay_sprite();
         screen.show_text("You toss down a bright bauble. The creature snatches it up and "
                           "flees through a gap in the ceiling.");
         break;
@@ -159,6 +176,7 @@ void DrawingRoom::on_choice(int action_id, RoomScreen& screen)
         if(result == Result::SUCCESS)
         {
             _raven_gone = true;
+            screen.hide_overlay_sprite();
             screen.show_text("You lunge and shout. Startled, it bolts through a gap in the "
                               "ceiling.");
         }
@@ -174,6 +192,16 @@ void DrawingRoom::on_choice(int action_id, RoomScreen& screen)
     default:
         break;
     }
+}
+
+void DrawingRoom::build_ambient(bn::ivector<AmbientDecor>& out) const
+{
+    // The room's blinking stars/eyes overlays (blinking_stars/blinking_eyes
+    // in the source) are a separate, state-dependent ambient effect, not
+    // ported here — this is only the three unconditional candles.
+    out.push_back({ AmbientKind::CANDLE, -52, -47 });
+    out.push_back({ AmbientKind::CANDLE, -42, -47 });
+    out.push_back({ AmbientKind::CANDLE, -32, -47 });
 }
 
 uint16_t DrawingRoom::save_state() const

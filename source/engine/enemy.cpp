@@ -210,4 +210,21 @@ const bn::sprite_item& enemy_sprite_item(EnemyId id)
     }
 }
 
+EnemyAnim enemy_anim_kind(EnemyId id)
+{
+    switch(id)
+    {
+
+    case EnemyId::Rat:
+        return EnemyAnim::RAT_FLOOR;
+
+    case EnemyId::Raven:
+    case EnemyId::HungryBats:
+        return EnemyAnim::FIGURE_EIGHT;
+
+    default:
+        return EnemyAnim::NONE;
+    }
+}
+
 }

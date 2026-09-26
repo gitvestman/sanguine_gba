@@ -116,6 +116,12 @@ void Library::on_choice(int action_id, RoomScreen& screen)
     }
 }
 
+void Library::build_ambient(bn::ivector<AmbientDecor>& out) const
+{
+    out.push_back({ AmbientKind::CANDLE, -4, -44 });
+    out.push_back({ AmbientKind::CANDLE, 6, -44 });
+}
+
 uint16_t Library::save_state() const
 {
     uint16_t bits = Room::save_state();

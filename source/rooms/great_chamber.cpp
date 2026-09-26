@@ -118,6 +118,11 @@ void GreatChamber::on_choice(int action_id, RoomScreen& screen)
     }
 }
 
+void GreatChamber::build_ambient(bn::ivector<AmbientDecor>& out) const
+{
+    out.push_back({ AmbientKind::CANDLE, -43, -21 });
+}
+
 uint16_t GreatChamber::save_state() const
 {
     uint16_t bits = Room::save_state();

@@ -21,11 +21,13 @@ class ChoiceList
 {
 
 public:
-    // Must be >= the largest choice list any room ever builds (StoneCorridor
-    // currently builds 7) — RoomScreen's own per-frame buffers cap at 8, so
-    // this matches that as the true upper bound; going over silently crashes
-    // (bn::vector push_back asserts) rather than dropping choices.
-    static constexpr int max_options = 8;
+    // Must be >= the largest choice list any room ever builds, plus the
+    // global "Inv" entry RoomScreen::run() appends to every room (FancyCorridor01
+    // is currently the worst case: Look + 7 directions + "Talk to the
+    // Countess" + Inv = 10) — RoomScreen's own per-frame buffers match this
+    // as the true upper bound; going over silently crashes (bn::vector
+    // push_back asserts) rather than dropping choices.
+    static constexpr int max_options = 10;
 
     explicit ChoiceList(bn::sprite_text_generator& generator);
 

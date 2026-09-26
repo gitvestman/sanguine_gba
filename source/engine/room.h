@@ -98,6 +98,29 @@ struct Choice
     int action_id;
 };
 
+// Phase 4i follow-up: the source project's Room.corridor_torches()/
+// doorway_torches()/candles() overlay small looping flame-flicker animations
+// (graphics/rooms/Torches_*.tres, Candle_Frames.tres) on top of the static
+// room art — unconditional ambient set dressing, not tied to room state, so
+// a fixed per-room list built once on room entry is enough (see
+// RoomScreen::show_enemy's per-frame animator for something that DOES need
+// to react to state/movement; this is simpler, just a looping frame cycle).
+// Positions are given in RoomScreen's centered sprite coordinates, i.e.
+// already converted from the source's 180x140 room-canvas coordinates via
+// (source_x - 90, source_y - 80) — see convert_room_bg.py's centering math.
+enum class AmbientKind
+{
+    TORCH,
+    CANDLE
+};
+
+struct AmbientDecor
+{
+    AmbientKind kind;
+    bn::fixed x;
+    bn::fixed y;
+};
+
 class Room
 {
 
@@ -118,6 +141,10 @@ public:
     // Called right after the background/description are shown for a room
     // that was just entered (room.gd's enter_room() override hook).
     virtual void on_enter(RoomScreen& /*screen*/) {}
+
+    // Appends this room's ambient torches/candles (see AmbientDecor) — most
+    // rooms have none, hence the no-op default.
+    virtual void build_ambient(bn::ivector<AmbientDecor>& /*out*/) const {}
 
     // Packs/restores this room's whole persistent state (visited plus every
     // subclass-specific flag) into/from a single byte for SaveGame — every

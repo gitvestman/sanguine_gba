@@ -67,4 +67,10 @@ void StairwayBasement::on_choice(int action_id, RoomScreen& screen)
     }
 }
 
+void StairwayBasement::build_ambient(bn::ivector<AmbientDecor>& out) const
+{
+    out.push_back({ AmbientKind::TORCH, -40, -20 });
+    out.push_back({ AmbientKind::TORCH, 40, -20 });
+}
+
 }

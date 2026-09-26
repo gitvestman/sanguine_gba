@@ -69,9 +69,13 @@ public:
     void tumble_die(int value);
     void hide_die();
 
-    // Shows/hides the enemy sprite overlaid on the room background during
-    // combat (Combat::fight) — matches the source project's per-enemy
-    // SpriteAnimations.*() overlay.
+    // Shows/hides the enemy sprite overlaid on the room background — used
+    // both by Combat::fight and by a room's own on_enter() for ambient
+    // pre-fight content (the raven already circling in ForestCrossing, the
+    // rat already scurrying in KitchenCellar) — matches the source
+    // project's per-enemy SpriteAnimations.*() overlay, including its
+    // per-instance scale/movement animation (see EnemyAnim) for the enemies
+    // that have one.
     void show_enemy(EnemyId id);
     void hide_enemy();
 
@@ -91,6 +95,13 @@ public:
     // yet to return to (Phase 4g).
     [[noreturn]] void win();
 
+    // Phase 4h's inventory browser: D-pad left/right cycles owned items,
+    // showing each one's name + tooltip description, with a "Use" choice
+    // when item_is_usable() allows it. Reached via the global "Inv" entry
+    // run() appends to every room's choice list; blocks until the player
+    // backs out (B, or choosing "Back").
+    void _open_inventory();
+
     // For widgets that need to draw their own text outside the normal
     // text-box/choice-list flow (e.g. SlidingPuzzle's cell cursor) —
     // sharing this instance instead of constructing another one avoids
@@ -103,6 +114,18 @@ public:
 private:
     void _enter_room(RoomId id);
     void _refresh_sidebars();
+    void _refresh_ambient(RoomId id);
+
+    // Advances whichever overlay animation is active (see EnemyAnim) by one
+    // frame and repositions/re-flips the sprite accordingly — called from
+    // every blocking loop that already ticks bn::core::update() (show_text,
+    // choose), so ambient wandering keeps moving while the player reads or
+    // picks a choice, not just during Combat::fight.
+    void _update_enemy_animation();
+
+    // Advances every room's ambient torch/candle flame by one frame — same
+    // call sites as _update_enemy_animation(), same reasoning.
+    void _update_ambient();
 
     // Checked at the top of show_text/choose — the two places any story
     // beat or menu passes through — so death from any source (a trap, a
@@ -134,6 +157,35 @@ private:
     ui::DiceView _dice_view;
     bn::optional<bn::regular_bg_ptr> _background;
     bn::optional<bn::sprite_ptr> _enemy_sprite;
+
+    // Overlay animation state (see EnemyAnim/_update_enemy_animation) —
+    // only meaningful while _enemy_sprite is set and _enemy_anim != NONE.
+    // RAT_FLOOR reuses _anim_index as the current waypoint target and
+    // _anim_paused/_anim_frame for the pause-between-dashes timer; FIGURE_EIGHT
+    // reuses _anim_frame as the path angle in degrees (it just counts up
+    // forever, wrapping via degrees_sin's own period).
+    EnemyAnim _enemy_anim = EnemyAnim::NONE;
+    int _anim_frame = 0;
+    int _anim_index = 0;
+    bool _anim_paused = false;
+    bn::fixed _anim_x;
+
+    // Ambient torch/candle overlays for the current room (see AmbientDecor)
+    // — one sprite_ptr per decoration, plus its own frame/wait counters
+    // since torches (8 frames) and candles (6 frames) cycle at different
+    // lengths but the same speed (12 ticks/frame, matching the source's
+    // "speed 5.0" SpriteFrames animations at 60 FPS).
+    struct AmbientSprite
+    {
+        bn::sprite_ptr sprite;
+        AmbientKind kind;
+        int frame = 0;
+        int wait = 0;
+    };
+
+    static constexpr int max_ambient = 6;
+    bn::vector<AmbientSprite, max_ambient> _ambient;
+
     RoomId _current_room = RoomId::OutsideGates;
     bool _game_over = false;
 

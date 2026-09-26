@@ -4,6 +4,8 @@
 #include "../engine/combat.h"
 #include "../engine/game_state.h"
 
+#include "bn_sprite_items_enemy_zombie.h"
+
 namespace sg::rooms
 {
 
@@ -106,6 +108,16 @@ void BedChamber01::build_choices(bn::ivector<Choice>& out)
     }
 }
 
+void BedChamber01::on_enter(RoomScreen& screen)
+{
+    bool resolved = enemy(EnemyId::Zombie).is_dead() || _peaceful;
+
+    if(! resolved && _encounter != ZombieEncounter::START)
+    {
+        screen.show_overlay_sprite(bn::sprite_items::enemy_zombie);
+    }
+}
+
 void BedChamber01::on_choice(int action_id, RoomScreen& screen)
 {
     switch(action_id)
@@ -146,6 +158,7 @@ void BedChamber01::on_choice(int action_id, RoomScreen& screen)
 
     case 4:
         _encounter = ZombieEncounter::ANNOUNCED;
+        screen.show_overlay_sprite(bn::sprite_items::enemy_zombie);
         screen.show_text("You clear your throat. A gaunt shape rises from the bed.");
         break;
 
@@ -170,11 +183,18 @@ void BedChamber01::on_choice(int action_id, RoomScreen& screen)
 
     case 6:
         _encounter = ZombieEncounter::START;
+        screen.hide_overlay_sprite();
         screen.show_text("You back out of the room, leaving it be for now.");
         break;
 
     case 7:
         Combat::fight(screen, EnemyId::Zombie);
+
+        if(! enemy(EnemyId::Zombie).is_dead())
+        {
+            screen.show_overlay_sprite(bn::sprite_items::enemy_zombie);
+        }
+
         break;
 
     case 8:
@@ -194,6 +214,7 @@ void BedChamber01::on_choice(int action_id, RoomScreen& screen)
         if(result == Result::SUCCESS)
         {
             _peaceful = true;
+            screen.hide_overlay_sprite();
             GameState::instance().change_luck(1);
             screen.show_text("You bear the stench and stillness until it settles, "
                               "seemingly at peace. You feel luckier for it.");
@@ -203,6 +224,11 @@ void BedChamber01::on_choice(int action_id, RoomScreen& screen)
             GameState::instance().take_damage(1);
             screen.show_text("Your stomach turns and you flinch. It reacts violently!");
             Combat::fight(screen, EnemyId::Zombie);
+
+            if(! enemy(EnemyId::Zombie).is_dead())
+            {
+                screen.show_overlay_sprite(bn::sprite_items::enemy_zombie);
+            }
         }
 
         break;

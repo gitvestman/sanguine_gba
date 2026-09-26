@@ -150,6 +150,12 @@ void StoneCorridor::on_choice(int action_id, RoomScreen& screen)
     }
 }
 
+void StoneCorridor::build_ambient(bn::ivector<AmbientDecor>& out) const
+{
+    out.push_back({ AmbientKind::TORCH, -78, -20 });
+    out.push_back({ AmbientKind::TORCH, 75, -20 });
+}
+
 uint16_t StoneCorridor::save_state() const
 {
     uint16_t bits = Room::save_state();

@@ -32,13 +32,18 @@ void OutsideGates::describe(bn::string<768>& out, bool force_long)
     }
 }
 
-void OutsideGates::on_enter(RoomScreen&)
+void OutsideGates::on_enter(RoomScreen& screen)
 {
     if(is_escaping() && ! _guard_assigned)
     {
         _guard_assigned = true;
         bn::optional<EnemyId> pursuer = pick_pursuer();
         _guard = pursuer.has_value() ? pursuer.value() : EnemyId::COUNT;
+    }
+
+    if(_guard != EnemyId::COUNT && ! enemy(_guard).is_dead())
+    {
+        screen.show_enemy(_guard);
     }
 }
 
@@ -82,6 +87,12 @@ void OutsideGates::on_choice(int action_id, RoomScreen& screen)
 
     case 2:
         Combat::fight(screen, _guard);
+
+        if(! enemy(_guard).is_dead())
+        {
+            screen.show_enemy(_guard);
+        }
+
         break;
 
     case 3:
@@ -91,6 +102,21 @@ void OutsideGates::on_choice(int action_id, RoomScreen& screen)
     default:
         break;
     }
+}
+
+void OutsideGates::build_ambient(bn::ivector<AmbientDecor>& out) const
+{
+    // outside_gates_tall_torches.png positions these at Vector2(50,219) and
+    // Vector2(130,219) in the source's 180x294 "tall" canvas (the scrolling
+    // look-at-the-castle shot), but this port's outside_gates.bmp is only
+    // that image's bottom 140 rows (rows [154,294) — verified by diffing
+    // the converted asset against the source PNGs, since the scroll effect
+    // itself isn't ported — so 219 becomes row 219-154=65 in the coordinates
+    // this room's art actually uses. From there it's the usual
+    // (source_x - 90, source_y - 80) conversion every other room's ambient
+    // decor uses (see convert_room_bg.py's canvas-centering math).
+    out.push_back({ AmbientKind::TORCH, -40, -15 });
+    out.push_back({ AmbientKind::TORCH, 40, -15 });
 }
 
 uint16_t OutsideGates::save_state() const

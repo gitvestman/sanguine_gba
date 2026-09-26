@@ -36,6 +36,14 @@ void ScientificLaboratory::describe(bn::string<768>& out, bool force_long)
     }
 }
 
+void ScientificLaboratory::on_enter(RoomScreen& screen)
+{
+    if(_trap_sprung && ! enemy(EnemyId::Golem).is_dead() && ! _golem.resolved())
+    {
+        screen.show_overlay_sprite(bn::sprite_items::enemy_golem);
+    }
+}
+
 void ScientificLaboratory::build_choices(bn::ivector<Choice>& out)
 {
     if(! _trap_sprung)
@@ -102,6 +110,7 @@ void ScientificLaboratory::on_choice(int action_id, RoomScreen& screen)
 
         if(! enemy(EnemyId::Golem).is_dead())
         {
+            screen.show_overlay_sprite(bn::sprite_items::enemy_golem);
             screen.show_text("As the sparks die down, a hulking construct of stone and iron "
                               "stirs in the corner.");
         }
@@ -136,16 +145,34 @@ void ScientificLaboratory::on_choice(int action_id, RoomScreen& screen)
         screen.show_text("\"I mean you no harm,\" you say. The golem's amber eyes track "
                           "you, but it doesn't move.");
         _golem.talk(screen, "It waits.", &bn::sprite_items::enemy_golem);
+
+        if(! enemy(EnemyId::Golem).is_dead() && ! _golem.resolved())
+        {
+            screen.show_overlay_sprite(bn::sprite_items::enemy_golem);
+        }
+
         break;
 
     case 5:
         _golem_approached = true;
         screen.show_text("\"Stand aside,\" you warn it. The golem's eyes flare brighter.");
         _golem.talk(screen, "It waits.", &bn::sprite_items::enemy_golem);
+
+        if(! enemy(EnemyId::Golem).is_dead() && ! _golem.resolved())
+        {
+            screen.show_overlay_sprite(bn::sprite_items::enemy_golem);
+        }
+
         break;
 
     case 6:
         _golem.talk(screen, "It waits.", &bn::sprite_items::enemy_golem);
+
+        if(! enemy(EnemyId::Golem).is_dead() && ! _golem.resolved())
+        {
+            screen.show_overlay_sprite(bn::sprite_items::enemy_golem);
+        }
+
         break;
 
     default:

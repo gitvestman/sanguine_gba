@@ -80,6 +80,21 @@ Enemy& enemy(EnemyId id);
 // matches the source project's SpriteAnimations.*() enemy art overlay.
 const bn::sprite_item& enemy_sprite_item(EnemyId id);
 
+// Phase 4i: a handful of small critters get a per-instance overlay
+// animation in the source project (utils/sprite_animations.gd) instead of
+// sitting still — a floor-dashing waypoint walk (2x scale) for the rat, and
+// a looping figure-eight flight path for the raven/hungry bats. Everything
+// else (Zombie, Golem, Countess, MadGnome, GhostlyBride's portrait, ...) is
+// static in the source too, so this only needs three cases.
+enum class EnemyAnim
+{
+    NONE,
+    RAT_FLOOR,
+    FIGURE_EIGHT
+};
+
+EnemyAnim enemy_anim_kind(EnemyId id);
+
 }
 
 #endif

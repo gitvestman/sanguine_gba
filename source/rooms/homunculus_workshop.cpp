@@ -103,6 +103,11 @@ void HomunculusWorkshop::on_choice(int action_id, RoomScreen& screen)
     }
 }
 
+void HomunculusWorkshop::build_ambient(bn::ivector<AmbientDecor>& out) const
+{
+    out.push_back({ AmbientKind::CANDLE, -34, -20 });
+}
+
 uint16_t HomunculusWorkshop::save_state() const
 {
     uint16_t bits = Room::save_state();

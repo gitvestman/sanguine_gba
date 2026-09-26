@@ -29,6 +29,11 @@ namespace
         // pushed ItemId::COUNT past 8.
         uint16_t inventory_mask;
 
+        // The flintlock's remaining shots (see Inventory::flintlock_ammo) —
+        // the one piece of inventory state that isn't just an owned/not-owned
+        // bit, so it needs its own field alongside inventory_mask.
+        uint8_t flintlock_ammo;
+
         // Widened from uint8_t once Cemetery's Myling encounter (Phase 4c)
         // needed more than 8 bits of state for one room — a GBA SRAM chip
         // has many KB to spare, so this is just a self-imposed sanity
@@ -71,6 +76,8 @@ RoomId SaveGame::load_or_new_game()
         }
     }
 
+    inventory.set_flintlock_ammo(data.flintlock_ammo);
+
     for(int i = 0; i < int(RoomId::COUNT); ++i)
     {
         room(RoomId(i)).load_state(data.room_state[i]);
@@ -100,6 +107,8 @@ void SaveGame::save(RoomId current_room)
             data.inventory_mask |= uint16_t(1 << i);
         }
     }
+
+    data.flintlock_ammo = uint8_t(inventory.flintlock_ammo());
 
     for(int i = 0; i < int(RoomId::COUNT); ++i)
     {

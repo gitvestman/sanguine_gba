@@ -10,12 +10,13 @@ spinoff sharing this world's cast and opening beat). This plan keeps Sanguine's 
 that structure already fits a handheld's button/menu interface well — and treats the port as
 primarily an **asset-pipeline and content-compression problem**, not a redesign.
 
-**Status (2026-09-24):** Phases 0–4 are complete and committed — all of Phase 4's sub-phases
+**Status (2026-09-26):** Phases 0–4 are complete and committed — all of Phase 4's sub-phases
 (4a dialogue engine, 4b First Floor, 4c Outside, 4d Second Floor, 4e Third Floor + Countess,
-4f escape endgame, 4g title screen) are implemented, boot-tested, and awaiting a full
-playtest. Phase 4h (usable inventory) and 4i (enemy overlay scale/movement/ambient
-appearance) remain future polish per the roadmap below. Phase 5 (audio) and Phase 6 (polish +
-itch.io web build) are not started.
+4f escape endgame, 4g title screen) are implemented, boot-tested, and playtested (several
+rounds of bug fixes/polish already folded back in). 4h (usable inventory), 4i (enemy overlay
+scale/movement/ambient appearance), and 4j (ambient torch/candle flicker, added after 4h/4i on
+the user's own follow-up request) are also now implemented and boot-tested, pending playtest.
+Phase 5 (audio) and Phase 6 (polish + itch.io web build) are not started.
 
 Grounded in a real look at the source project, not assumptions:
 
@@ -247,15 +248,22 @@ already shipped in Phase 1, portable/testable/committable on its own:
   with `sanguine_gb`'s own intro in the facts table above) landing in ForestCrossing — so this
   sub-phase depends on 4c's Outside rooms existing, and should follow it rather than come
   first.
-- **4h — Usable inventory.** Right now the item sidebar (`ui::ItemBar`) only *displays* owned
-  items — potions and the like can only actually be used mid-combat, via `Combat::fight`'s own
-  choice list. Add a real "open inventory" entry point from the room-exploration loop (a new
-  `RoomScreen` method alongside `choose`/`show_text`) that lets the player navigate the item
-  icons directly and select one to consume outside a fight — matching how the source project
-  lets potions/keys/tools be used from the room screen itself, not only from the fight menu.
-  Also the moment to revisit the item sidebar's 4-icon limit flagged back in Phase 1 (smaller
-  icons, or paging) if a floor's ported items ever exceed it.
-- **4i — Enemy overlay scale + movement.** Flagged by the user as future polish once real
+- **4h — Usable inventory. DONE.** Implemented as `RoomScreen::_open_inventory()`, reached via
+  a global "Inv" entry `run()` appends to every room's choice list. Item name/description
+  table lives in the new `engine/item_info.h/.cpp` (`item_info`, `item_is_usable`, `use_item`,
+  and the shared `item_icon()` lookup — `ItemBar` and the browser both call it now instead of
+  each keeping their own copy). Browsing pages through owned items
+  `ui::ChoiceList::max_options - 2` at a time (a "More" entry appears when there's another
+  page), shows each one's description via the normal `show_text`, and offers "Use" when
+  `item_is_usable()` allows it — `Combat::fight`'s own mid-fight item use now calls the same
+  shared `use_item()` instead of duplicating the potion effects inline. Also bumped
+  `ui::ChoiceList::max_options` from 8 to 10 while touching this: `FancyCorridor01` can already
+  emit 9 choices (Look + 7 directions + "Talk to the Countess") before the new global "Inv"
+  entry pushed the worst case to 10 — a real latent overflow bug, fixed as part of this same
+  change rather than left for the next room that happens to trip it. The item sidebar's
+  own 4-icon limit (flagged back in Phase 1) is untouched — no floor has exceeded it yet.
+- **4i — Enemy overlay scale + movement. DONE** (with one deliberate cut — see below).
+  Flagged by the user as future polish once real
   combat encounters (4b's rat/bats) surfaced the gap: `utils/sprite_animations.gd` gives each
   small critter both a per-instance scale (the rat renders at `Vector2(2, 2)`, i.e. 2x, since
   its source art is tiny — `enemy_sprite_item()`/`RoomScreen::show_enemy` currently always
@@ -278,8 +286,73 @@ already shipped in Phase 1, portable/testable/committable on its own:
   flow, before any fight choice is picked, wherever the source room's `get_extra_content()`
   did the same.
 
+  **Implemented as:** `EnemyId`/`EnemyAnim` gained `enemy_anim_kind()` (`engine/enemy.h/.cpp`)
+  — `RAT_FLOOR` for the Rat, `FIGURE_EIGHT` for the (forest) Raven and Hungry Bats, `NONE` for
+  everything else (Zombie/Golem/Countess/MadGnome/NightRaven/GhostlyBride's portrait all stay
+  static in the source too). `RoomScreen::show_enemy(EnemyId)` now sets this up and
+  `RoomScreen::_update_enemy_animation()` advances it one tick every time `show_text`/`choose`
+  already call `bn::core::update()` — no separate tween system needed, and it runs during
+  ambient display exactly the same as during `Combat::fight` since both now go through the one
+  `show_enemy()` entry point (ForestCrossing/KitchenCellar/OutsideGates' ambient overlays were
+  switched from calling `show_overlay_sprite()` directly to `show_enemy()`, so ambient content
+  animates too, e.g. the escape guard if it happens to roll Rat/Raven/HungryBats). The rat gets
+  `set_scale(2)` (Butano auto-attaches the affine mat this needs) and dashes between 6 waypoints
+  with a pause and a horizontal flip at each turn, rescaled from the source's 180px-wide canvas
+  coordinates onto this build's narrower safe travel range; the raven/bats loop a figure-eight
+  via `bn::degrees_sin` at two different phases (`sin(θ)`/`sin(2θ)`), matching the source's
+  Lissajous path shape. **Deliberately cut:** the raven's 4-frame flight-animation cycling —
+  the source pulls its frames from a 41x41 sprite sheet, but this port's `enemy_raven` asset was
+  already converted as a single static 64x64 image with no sheet to slice; adding one needs new
+  source art conversion work, not just wiring, so it's left as a static sprite that only moves,
+  not flaps. Revisit if/when raven art gets a real multi-frame sheet.
+
 Enemies and dialogue for a given area are ported alongside that area's own sub-phase (as
 DungeonCreatures/Homunculus were with the Basement in Phases 1–2), not as a separate pass.
+
+- **4j — Ambient torch/candle flicker. DONE.** User asked, after seeing 4i's animated enemy
+  overlays, whether the source project's animated torch/candle overlays (`Room.
+  corridor_torches()`/`doorway_torches()`/`candles()`, `graphics/rooms/Torches_*.tres` +
+  `Candle_Frames.tres`) could be reused too. They could, almost directly: both source sheets
+  are already frame-strips (`torch_front_10x38px.png` 8 frames of 10x38, `candle_flame_6x9px.png`
+  6 frames of 6x9, both looping at the SpriteFrames "speed 5.0" — 5 frames/second), just laid
+  out horizontally where this port's multi-frame sprite convention (see `assets/sprites/die.bmp`
+  + its `"height"` JSON key, first used for the dice) needs them vertical. New
+  `tools/convert_flame_frames.py` slices a horizontal N-frame sheet, pads each frame into the
+  smallest valid GBA sprite shape that contains it (GBA sprites only support a fixed list of
+  (width, height) pairs — 10x38 isn't one, so the torch frame is padded into 32x64; 6x9 fits
+  into 8x16 for the candle), and quantizes all frames together into one shared palette, output
+  as `assets/sprites/ambient_torch.bmp`/`ambient_candle.bmp`. `Room` gained a new
+  `AmbientDecor`/`AmbientKind` (`engine/room.h`) and a `build_ambient()` virtual (default
+  no-op, like `on_enter`) — a fixed list of torch/candle positions built once per room entry
+  (`RoomScreen::_refresh_ambient`), since unlike 4i's enemies these never move or change with
+  room state. `RoomScreen::_update_ambient()` advances each one's frame every 12 ticks (60 FPS
+  / 5 FPS) from the same `show_text`/`choose` update hooks 4i already added. Positions were
+  read directly out of each source room's `.gd` (`get_extra_content()`) and converted from the
+  source's 180x140 room-canvas coordinates into this engine's centered sprite coordinates via
+  `(source_x - 90, source_y - 80)` — derived from `convert_room_bg.py`'s centering math
+  (180x140 art padded onto a 256x256 canvas at offset (38,58), displayed via
+  `create_bg(0, -10)`). Wired into 20 rooms this way: `corridor_torches()` (CellarHall,
+  KitchenCellar, StoneCorridor), `doorway_torches()` (HallOfArmors, Stairway2ndFloor,
+  StairwayBasement), a single `doorway_torch()` (Dungeon), and `candles()` (AlchemicalLaboratory,
+  AudienceHall, Chapel, DinnerHall, DrawingRoom, GreatChamber, GreatHall, GuestBedroom, Library,
+  MusicRoom, Reliquary, Stairway1stFloor, HomunculusWorkshop), plus OutsideGates (see below).
+  **Deliberately skipped**: ToymakersWorkshop (its candle is baked directly into the static room
+  art, no separate overlay in the source either). DrawingRoom's other two ambient effects there
+  (`blinking_stars`/`blinking_eyes`, state-dependent) are a different, not-yet-ported feature —
+  only its three unconditional candles were added.
+
+  **OutsideGates follow-up** (user noticed the torches were missing there, asked to work out
+  the placement): initially skipped because the source's `outside_gates.gd` positions its two
+  torches at Vector2(50,219)/Vector2(130,219) in a 180x294 "tall" canvas (`outside_gates_tall_
+  torches.png`, used for the source's scrolling look-at-the-castle shot) — outside the normal
+  180x140 room-art coordinate space every other room's ambient positions are given in.
+  Resolved by diffing this port's converted `assets/rooms/outside_gates.bmp` against the
+  source PNGs (`Image.crop` + a mean absolute pixel-difference check): it's a near-exact match
+  (~1.1 average channel difference, vs. ~19-34 for the other candidates) for the tall image's
+  *bottom* 140 rows, i.e. rows [154, 294) — confirming the scroll effect itself isn't ported,
+  just its final resting frame. That fixes the crop offset: source row 219 -> 219-154=65 in
+  this room's own art coordinates, then the usual `(x-90, y-80)` conversion applies from
+  there — `OutsideGates::build_ambient()` places both torches at screen (-40,-15)/(40,-15).
 
 **Phase 5 — Audio.** Tracker music + compressed SFX, scoped and estimated as its own
 milestone per the [Audio](#audio) note above.

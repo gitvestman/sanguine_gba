@@ -34,6 +34,14 @@ void ForestCrossing::describe(bn::string<768>& out, bool force_long)
     }
 }
 
+void ForestCrossing::on_enter(RoomScreen& screen)
+{
+    if(! enemy(EnemyId::Raven).is_dead())
+    {
+        screen.show_enemy(EnemyId::Raven);
+    }
+}
+
 void ForestCrossing::build_choices(bn::ivector<Choice>& out)
 {
     out.push_back({ "Look", 0 });
@@ -105,6 +113,12 @@ void ForestCrossing::on_choice(int action_id, RoomScreen& screen)
 
     case 6:
         Combat::fight(screen, EnemyId::Raven);
+
+        if(! enemy(EnemyId::Raven).is_dead())
+        {
+            screen.show_enemy(EnemyId::Raven);
+        }
+
         break;
 
     default:

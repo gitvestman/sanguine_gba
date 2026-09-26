@@ -127,6 +127,12 @@ void Chapel::on_choice(int action_id, RoomScreen& screen)
     }
 }
 
+void Chapel::build_ambient(bn::ivector<AmbientDecor>& out) const
+{
+    out.push_back({ AmbientKind::CANDLE, -26, -3 });
+    out.push_back({ AmbientKind::CANDLE, 26, -3 });
+}
+
 uint16_t Chapel::save_state() const
 {
     uint16_t bits = Room::save_state();

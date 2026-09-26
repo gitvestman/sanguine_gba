@@ -3,6 +3,9 @@
 #include "bn_core.h"
 #include "bn_string.h"
 #include "bn_keypad.h"
+#include "bn_algorithm.h"
+#include "bn_math.h"
+#include "bn_utility.h"
 
 #include "common_variable_8x8_sprite_font.h"
 
@@ -12,8 +15,11 @@
 #include "../engine/save_game.h"
 #include "../engine/escape.h"
 #include "../engine/combat.h"
+#include "../engine/item_info.h"
 
 #include "bn_sprite_items_panel_tile.h"
+#include "bn_sprite_items_ambient_torch.h"
+#include "bn_sprite_items_ambient_candle.h"
 #include "bn_regular_bg_items_castle_title.h"
 #include "bn_regular_bg_items_castle_menu.h"
 #include "bn_regular_bg_items_intro_trees_far.h"
@@ -99,6 +105,8 @@ void RoomScreen::show_text(const bn::string_view& text)
     while(_text_box.active())
     {
         _text_box.update();
+        _update_enemy_animation();
+        _update_ambient();
         bn::core::update();
     }
 }
@@ -112,6 +120,8 @@ int RoomScreen::choose(const bn::ivector<bn::string<40>>& options)
     while(true)
     {
         bn::optional<int> picked = _choices.update();
+        _update_enemy_animation();
+        _update_ambient();
 
         // Always update before returning (even on the frame a pick is
         // detected), matching show_text()'s loop shape below — otherwise
@@ -146,9 +156,46 @@ void RoomScreen::hide_die()
     _dice_view.hide();
 }
 
+namespace
+{
+    // Approximates rat_floor()'s six-waypoint dash loop (utils/sprite_animations.gd),
+    // its 180px-wide canvas x's rescaled onto this overlay's much narrower safe
+    // travel range (see the class comment on _update_enemy_animation).
+    constexpr bn::fixed rat_waypoints_x[6] = { 44, 4, 52, -48, -11, -37 };
+    constexpr int rat_pause_frames = 21;
+    constexpr bn::fixed rat_step = 1;
+
+    constexpr bn::fixed figure_eight_amplitude_x = 40;
+    constexpr bn::fixed figure_eight_amplitude_y = 20;
+    const bn::fixed figure_eight_step_degrees = 1.5;
+}
+
 void RoomScreen::show_enemy(EnemyId id)
 {
     show_overlay_sprite(enemy_sprite_item(id));
+
+    _enemy_anim = enemy_anim_kind(id);
+    _anim_frame = 0;
+    _anim_index = 0;
+    _anim_paused = false;
+
+    switch(_enemy_anim)
+    {
+
+    case EnemyAnim::RAT_FLOOR:
+        _enemy_sprite->set_scale(2);
+        _anim_x = rat_waypoints_x[5];
+        _enemy_sprite->set_x(_anim_x);
+        _enemy_sprite->set_horizontal_flip(rat_waypoints_x[0] < _anim_x);
+        break;
+
+    case EnemyAnim::FIGURE_EIGHT:
+        _anim_x = 0;
+        break;
+
+    case EnemyAnim::NONE:
+        break;
+    }
 }
 
 void RoomScreen::hide_enemy()
@@ -159,11 +206,78 @@ void RoomScreen::hide_enemy()
 void RoomScreen::show_overlay_sprite(const bn::sprite_item& item)
 {
     _enemy_sprite = item.create_sprite(0, -8);
+    _enemy_anim = EnemyAnim::NONE;
 }
 
 void RoomScreen::hide_overlay_sprite()
 {
     _enemy_sprite.reset();
+    _enemy_anim = EnemyAnim::NONE;
+}
+
+void RoomScreen::_update_enemy_animation()
+{
+    if(! _enemy_sprite.has_value())
+    {
+        return;
+    }
+
+    switch(_enemy_anim)
+    {
+
+    case EnemyAnim::RAT_FLOOR:
+    {
+        bn::fixed target = rat_waypoints_x[_anim_index];
+
+        if(_anim_paused)
+        {
+            ++_anim_frame;
+
+            if(_anim_frame >= rat_pause_frames)
+            {
+                _anim_paused = false;
+                _anim_frame = 0;
+                _anim_index = (_anim_index + 1) % 6;
+                _enemy_sprite->set_horizontal_flip(rat_waypoints_x[_anim_index] < _anim_x);
+            }
+
+            return;
+        }
+
+        if(_anim_x < target)
+        {
+            _anim_x = bn::min(_anim_x + rat_step, target);
+        }
+        else if(_anim_x > target)
+        {
+            _anim_x = bn::max(_anim_x - rat_step, target);
+        }
+
+        _enemy_sprite->set_x(_anim_x);
+
+        if(_anim_x == target)
+        {
+            _anim_paused = true;
+            _anim_frame = 0;
+        }
+
+        break;
+    }
+
+    case EnemyAnim::FIGURE_EIGHT:
+    {
+        ++_anim_frame;
+
+        bn::fixed angle = bn::fixed(_anim_frame) * figure_eight_step_degrees;
+        bn::fixed x = figure_eight_amplitude_x * bn::degrees_sin(angle);
+        bn::fixed y = -8 + figure_eight_amplitude_y * bn::degrees_sin(angle * 2);
+        _enemy_sprite->set_position(x, y);
+        break;
+    }
+
+    case EnemyAnim::NONE:
+        break;
+    }
 }
 
 void RoomScreen::goto_room(RoomId next, const bn::string_view& transition_text)
@@ -238,6 +352,7 @@ void RoomScreen::_enter_room(RoomId id)
     // it, so no art is cropped at the top; the bottom panel covers the
     // bottom of the art and the border below it.
     _background = background_item(id).create_bg(0, -10);
+    _refresh_ambient(id);
 
     Room& r = room(id);
     bn::string<768> description;
@@ -250,6 +365,49 @@ void RoomScreen::_enter_room(RoomId id)
     // while it's in progress, this also means a mid-fight death never
     // overwrites the checkpoint from before that fight started.
     SaveGame::save(id);
+}
+
+void RoomScreen::_refresh_ambient(RoomId id)
+{
+    _ambient.clear();
+
+    bn::vector<AmbientDecor, max_ambient> decor;
+    room(id).build_ambient(decor);
+
+    for(const AmbientDecor& d : decor)
+    {
+        const bn::sprite_item& item = d.kind == AmbientKind::TORCH
+                ? bn::sprite_items::ambient_torch : bn::sprite_items::ambient_candle;
+        AmbientSprite entry{ item.create_sprite(d.x, d.y), d.kind };
+        entry.sprite.set_z_order(1);
+        _ambient.push_back(bn::move(entry));
+    }
+}
+
+void RoomScreen::_update_ambient()
+{
+    // Matches the source's SpriteFrames "speed 5.0" (5 frames/second) at
+    // this engine's 60 FPS.
+    constexpr int wait_updates = 12;
+
+    for(AmbientSprite& entry : _ambient)
+    {
+        ++entry.wait;
+
+        if(entry.wait < wait_updates)
+        {
+            continue;
+        }
+
+        entry.wait = 0;
+
+        int frame_count = entry.kind == AmbientKind::TORCH ? 8 : 6;
+        entry.frame = (entry.frame + 1) % frame_count;
+
+        const bn::sprite_item& item = entry.kind == AmbientKind::TORCH
+                ? bn::sprite_items::ambient_torch : bn::sprite_items::ambient_candle;
+        entry.sprite.set_tiles(item.tiles_item(), entry.frame);
+    }
 }
 
 void RoomScreen::set_sidebars_visible(bool visible)
@@ -306,6 +464,16 @@ int RoomScreen::_choose_centered(const bn::ivector<bn::string<40>>& options)
 
         if(bn::keypad::a_pressed())
         {
+            // One more update() before returning so this frame's "A just
+            // pressed" edge is consumed here rather than surviving into
+            // whatever runs next — same reasoning as choose()'s own comment
+            // on this: without it, the very next input-reading loop (e.g.
+            // show_intro()'s TextBox) sees this same stale press on its
+            // first check, before it has ever called update() itself, and
+            // instantly acts on it (observed as the intro's first page
+            // flashing by unseen, since a fresh New Game selection landed
+            // here with A still "just pressed").
+            bn::core::update();
             return selected;
         }
     }
@@ -397,19 +565,29 @@ void RoomScreen::show_intro()
     trees_mid.set_priority(1);
     trees_near.set_priority(0);
 
+    // Pages 1 and 3 are adapted from the source project's own coach-ride
+    // narration (CHARACTER_SELECT_DESCRIPTION and
+    // CHARACTER_SELECT_COACH_STOP_DESCRIPTION in localization/sanguine_en.po)
+    // — the waking-up-alone beat and the coachman stopping short of the
+    // castle — condensed to this build's terser style and with the source's
+    // character-select and bag-item steps (no such systems exist here, one
+    // character is hardcoded) left out entirely. Page 2 is original
+    // atmosphere carried over from this port's first intro pass.
     const bn::string_view pages[] = {
-        "The coach rattles down a forgotten road, deep into the mountains, carrying you "
-        "toward a name whispered only in warning. Villages thin, then vanish; the trees "
-        "close in, tall and black against a sky gone the color of a bruise.\n\n"
-        "The driver has not spoken in an hour.",
+        "You awake with a start as the coach rattles over rough stone, deep in the "
+        "mountains. The other passengers are gone; you don't recall them leaving. Still, "
+        "it must be the 5th of September, 1846.\n\n"
+        "In the fading light, your own reflection stares back from the window glass, "
+        "dark forest and jagged peaks rising behind it.",
         "The horses grow skittish long before the castle comes into view, as if the road "
         "itself remembers what waits ahead. Somewhere out past the treeline, something answers "
         "the wind that no wind should.\n\n"
         "You grip whatever you brought to protect yourself, and try not to think too hard "
         "about why you came.",
-        "The coach stops at a crossing in the woods, and will go no further. From here, you go "
-        "the rest of the way on foot, alone, with only the moon and your own footsteps for "
-        "company."
+        "The coach jerks to a stop. \"I cannot drive closer,\" the driver calls back in a "
+        "thick accent, \"but the road to the castle, it is just ahead, yes?\"\n\n"
+        "You step out alone, and the coach rattles away into the dark. A narrow dirt path "
+        "winds off from the road, vanishing into black pine forest."
     };
 
     bn::fixed far_x;
@@ -435,6 +613,89 @@ void RoomScreen::show_intro()
     }
 }
 
+void RoomScreen::_open_inventory()
+{
+    // Every owned item, one page of up to page_size at a time (plus "Back",
+    // and "More" when another page follows) — kept below
+    // ui::ChoiceList::max_options even if every item in the game is owned
+    // at once, unlike a single flat list of all ItemId::COUNT entries.
+    constexpr int page_size = ui::ChoiceList::max_options - 2;
+    int page = 0;
+
+    while(true)
+    {
+        bn::vector<ItemId, int(ItemId::COUNT)> items;
+
+        for(int i = 0; i < int(ItemId::COUNT); ++i)
+        {
+            if(Inventory::instance().has(ItemId(i)))
+            {
+                items.push_back(ItemId(i));
+            }
+        }
+
+        if(items.empty())
+        {
+            show_text("Your bag is empty.");
+            return;
+        }
+
+        int page_count = (items.size() + page_size - 1) / page_size;
+
+        if(page >= page_count)
+        {
+            page = 0;
+        }
+
+        int start = page * page_size;
+        int end = bn::min(start + page_size, int(items.size()));
+        bool more = end < int(items.size());
+
+        bn::vector<bn::string<40>, ui::ChoiceList::max_options> labels;
+        for(int i = start; i < end; ++i)
+        {
+            labels.push_back(bn::string<40>(item_info(items[i]).name));
+        }
+
+        if(more)
+        {
+            labels.push_back("More");
+        }
+
+        labels.push_back("Back");
+
+        int picked = choose(labels);
+
+        if(picked == labels.size() - 1)
+        {
+            return;
+        }
+
+        if(more && picked == labels.size() - 2)
+        {
+            ++page;
+            continue;
+        }
+
+        ItemId item = items[start + picked];
+        show_text(item_info(item).description);
+
+        if(! item_is_usable(item))
+        {
+            continue;
+        }
+
+        bn::vector<bn::string<40>, 2> use_labels;
+        use_labels.push_back("Use");
+        use_labels.push_back("Back");
+
+        if(choose(use_labels) == 0)
+        {
+            use_item(item, *this);
+        }
+    }
+}
+
 void RoomScreen::run(RoomId start)
 {
     _enter_room(start);
@@ -443,16 +704,24 @@ void RoomScreen::run(RoomId start)
     {
         Room& r = room(_current_room);
 
-        bn::vector<Choice, 8> choices;
+        bn::vector<Choice, ui::ChoiceList::max_options - 1> choices;
         r.build_choices(choices);
 
-        bn::vector<bn::string<40>, 8> labels;
+        bn::vector<bn::string<40>, ui::ChoiceList::max_options> labels;
         for(const Choice& choice : choices)
         {
             labels.push_back(choice.text);
         }
+        labels.push_back("Inv");
 
         int picked = choose(labels);
+
+        if(picked == choices.size())
+        {
+            _open_inventory();
+            continue;
+        }
+
         RoomId room_before = _current_room;
         r.on_choice(choices[picked].action_id, *this);
         _handle_escape_pursuit(_current_room != room_before);

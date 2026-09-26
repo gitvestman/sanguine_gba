@@ -5,6 +5,7 @@
 
 #include "game_state.h"
 #include "inventory.h"
+#include "item_info.h"
 #include "rng.h"
 #include "../ui/room_screen.h"
 
@@ -19,7 +20,8 @@ namespace
     constexpr int hand_to_hand_id = 0;
     constexpr int use_restorative_id = 1;
     constexpr int use_healing_id = 2;
-    constexpr int flee_id = 3;
+    constexpr int fire_flintlock_id = 3;
+    constexpr int flee_id = 4;
 }
 
 CombatResult Combat::fight(RoomScreen& screen, EnemyId enemy_id)
@@ -37,8 +39,8 @@ CombatResult Combat::fight(RoomScreen& screen, EnemyId enemy_id)
 
     while(true)
     {
-        bn::vector<bn::string<40>, 4> labels;
-        bn::vector<int, 4> ids;
+        bn::vector<bn::string<40>, 5> labels;
+        bn::vector<int, 5> ids;
 
         labels.push_back("Hand to Hand");
         ids.push_back(hand_to_hand_id);
@@ -55,6 +57,18 @@ CombatResult Combat::fight(RoomScreen& screen, EnemyId enemy_id)
             ids.push_back(use_healing_id);
         }
 
+        if(Inventory::instance().has(ItemId::FLINTLOCK))
+        {
+            // Shown even at 0 ammo (matches the source's always-visible
+            // "Fire Flintlock (N)" choice) — picking it then just wastes the
+            // turn on a dry click instead of silently vanishing from the menu.
+            bn::string<40> label = "Fire Flintlock (";
+            label.append(bn::to_string<4>(Inventory::instance().flintlock_ammo()));
+            label.append(")");
+            labels.push_back(label);
+            ids.push_back(fire_flintlock_id);
+        }
+
         labels.push_back("Flee");
         ids.push_back(flee_id);
 
@@ -62,17 +76,58 @@ CombatResult Combat::fight(RoomScreen& screen, EnemyId enemy_id)
 
         if(picked == use_restorative_id)
         {
-            GameState::instance().change_sanity(3);
-            Inventory::instance().remove(ItemId::RESTORATIVE_MIXTURE);
-            screen.show_text("You use the restorative mixture.");
+            use_item(ItemId::RESTORATIVE_MIXTURE, screen);
             continue;
         }
 
         if(picked == use_healing_id)
         {
-            GameState::instance().take_damage(-4);
-            Inventory::instance().remove(ItemId::HEALING_TINCTURE);
-            screen.show_text("You use the healing tincture.");
+            use_item(ItemId::HEALING_TINCTURE, screen);
+            continue;
+        }
+
+        if(picked == fire_flintlock_id)
+        {
+            if(Inventory::instance().fire_flintlock())
+            {
+                // A DEX check vs. the enemy's dc, not STR (see
+                // fire_flintlock/fire_flintlock_result in
+                // gamestate_singleton.gd) — flat 3-7 damage on a hit,
+                // deliberately not boosted by the Homunculus bonus, which
+                // only empowers melee strikes in the source too.
+                Result result = screen.roll(Attribute::DEX, target.dc, false, "Fire Flintlock");
+
+                if(result == Result::SUCCESS)
+                {
+                    int hit_damage = rng().get_int(3, 8);
+                    target.take_player_damage(hit_damage);
+
+                    bn::string<64> text = "And hits for ";
+                    text.append(bn::to_string<8>(hit_damage));
+                    text.append(" damage.");
+                    screen.show_text(text);
+                }
+                else
+                {
+                    screen.show_text("And misses.");
+                }
+            }
+            else
+            {
+                screen.show_text("Click. Out of ammunition.");
+            }
+
+            if(target.is_dead())
+            {
+                bn::string<64> text = "You defeat ";
+                text.append(target.name);
+                text.append(".");
+                screen.show_text(text);
+                screen.hide_enemy();
+                return CombatResult::WON;
+            }
+
+            target.do_action(screen);
             continue;
         }
 

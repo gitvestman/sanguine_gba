@@ -95,6 +95,16 @@ void AudienceHall::on_choice(int action_id, RoomScreen& screen)
     }
 }
 
+void AudienceHall::build_ambient(bn::ivector<AmbientDecor>& out) const
+{
+    out.push_back({ AmbientKind::CANDLE, -78, -30 });
+    out.push_back({ AmbientKind::CANDLE, -68, -30 });
+    out.push_back({ AmbientKind::CANDLE, -58, -30 });
+    out.push_back({ AmbientKind::CANDLE, 58, -30 });
+    out.push_back({ AmbientKind::CANDLE, 68, -30 });
+    out.push_back({ AmbientKind::CANDLE, 78, -30 });
+}
+
 uint16_t AudienceHall::save_state() const
 {
     uint16_t bits = Room::save_state();
