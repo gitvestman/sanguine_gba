@@ -32,13 +32,36 @@ class RoomScreen
 public:
     RoomScreen();
 
-    // Phase 4g's title screen: the title card (with a "press A" prompt),
-    // then a New Game/Continue menu centered over the plain castle art
-    // (Continue omitted when `has_save` is false) — returns 0 for New Game
-    // or 1 for Continue. The stat/item sidebars are hidden for both this
-    // and show_intro(), and only revealed once real gameplay begins (see
-    // main.cpp) — set_sidebars_visible() does that.
-    int show_title_screen(bool has_save);
+    // Phase 4g's title card: the castle art with a "press A" prompt, then
+    // switches the background to the plain castle menu art underneath the
+    // New Game/Continue menu (see choose_new_or_continue()) — shown once
+    // per session, before that menu's own loop with the save-slot picker
+    // begins (see main.cpp). The stat/item sidebars are hidden for this and
+    // show_intro(), and only revealed once real gameplay begins —
+    // set_sidebars_visible() does that.
+    void show_title_card();
+
+    // The New Game/Continue menu itself (Continue omitted when `has_save`
+    // is false) — returns 0 for New Game or 1 for Continue. Split out from
+    // show_title_card() so main.cpp can redisplay just this menu, without
+    // the "press A" splash, if the player backs out of the save-slot picker
+    // with B.
+    int choose_new_or_continue(bool has_save);
+
+    // A centered 3-slot picker, reusing the title menu's background/layout —
+    // called right after choose_new_or_continue() returns, for whichever of
+    // New Game/Continue was picked. Each slot's label says whether it
+    // already holds a save, and if so, which room it would resume in (via
+    // SaveGame::peek_room()/room_short_name()), so slots are distinguishable
+    // at a glance. `only_occupied` restricts the list to slots that
+    // actually have one (Continue; guaranteed at least one exists, since
+    // choose_new_or_continue() only offers Continue when
+    // SaveGame::any_save_exists() is true) — omitted entirely, any slot may
+    // be picked (New Game; picking an occupied one overwrites it, same as
+    // the source's slot selection). Returns the chosen slot index (0-based),
+    // or -1 if the player backed out with B (see main.cpp's loop back to
+    // choose_new_or_continue() in that case).
+    int choose_save_slot(bool only_occupied);
 
     // The coach-ride opening, shown once on a fresh New Game before the
     // player's first real choice in ForestCrossing. Cut down hard from the
@@ -141,7 +164,8 @@ private:
     // A confirms), rather than the bottom-band ChoiceList every in-game
     // choice uses, since a title screen menu wants to sit in the middle of
     // the screen over the art, not in the reserved bottom panel.
-    int _choose_centered(const bn::ivector<bn::string<40>>& options);
+    // `cancelable` also accepts B, returning -1 (see choose_save_slot()).
+    int _choose_centered(const bn::ivector<bn::string<40>>& options, bool cancelable = false);
 
     // Overlays `text` centered at screen y `y`, with no panel/text-box
     // backdrop, and blocks until A is pressed — for a prompt drawn directly

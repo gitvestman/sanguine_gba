@@ -4,6 +4,7 @@
 #include <cstdint>
 
 #include "bn_string.h"
+#include "bn_string_view.h"
 #include "bn_vector.h"
 #include "bn_regular_bg_item.h"
 
@@ -170,6 +171,11 @@ Room& room(RoomId id);
 // The Butano regular_bg_item generated for this room's converted background
 // (see tools/convert_room_bg.py and assets/rooms/*.bmp+json).
 const bn::regular_bg_item& background_item(RoomId id);
+
+// A short, map-label-style name for this room (e.g. "the source project's
+// own <TR_PREFIX>_MAP" localization strings) — used by the save-slot picker
+// to say where each slot's save actually is, not gameplay text.
+bn::string_view room_short_name(RoomId id);
 
 // Whether the door gated by `key` is currently passable: owning `key`
 // itself, or the Skull Key (a master key for any IronKey-gated door in

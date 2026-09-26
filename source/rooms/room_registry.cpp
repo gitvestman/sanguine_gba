@@ -515,4 +515,173 @@ const bn::regular_bg_item& background_item(RoomId id)
     }
 }
 
+bn::string_view room_short_name(RoomId id)
+{
+    switch(id)
+    {
+
+    case RoomId::CellarHall:
+        return "Cellar Hall";
+
+    case RoomId::Ossuary:
+        return "Ossuary";
+
+    case RoomId::Dungeon:
+        return "Dungeon";
+
+    case RoomId::TortureChamber:
+        return "Torture Chamber";
+
+    case RoomId::StoneCorridor:
+        return "Stone Corridor";
+
+    case RoomId::ArmoryRoom:
+        return "Armory Room";
+
+    case RoomId::AlchemicalLaboratory:
+        return "Alchemical Laboratory";
+
+    case RoomId::StairwayBasement:
+        return "Basement Stairway";
+
+    case RoomId::TheMachine:
+        return "The Machine";
+
+    case RoomId::HomunculusWorkshop:
+        return "Homunculus Workshop";
+
+    case RoomId::GreatHall:
+        return "Great Hall";
+
+    case RoomId::Courtyard:
+        return "Courtyard";
+
+    case RoomId::Kitchen:
+        return "Kitchen";
+
+    case RoomId::DinnerHall:
+        return "Dinner Hall";
+
+    case RoomId::HallOfArmors:
+        return "Hall of Armors";
+
+    case RoomId::MusicRoom:
+        return "Music Room";
+
+    case RoomId::Chapel:
+        return "Chapel";
+
+    case RoomId::Storage:
+        return "Storage";
+
+    case RoomId::KitchenCellar:
+        return "Kitchen Cellar";
+
+    case RoomId::WineCellar:
+        return "Wine Cellar";
+
+    case RoomId::Orangery:
+        return "Orangery";
+
+    case RoomId::Larder:
+        return "Larder";
+
+    case RoomId::Stairway1stFloor:
+        return "First Floor Stairway";
+
+    case RoomId::ForestCrossing:
+        return "Forest Crossing";
+
+    case RoomId::GroundskeeperCottage:
+        return "Groundskeeper's Cottage";
+
+    case RoomId::Garden:
+        return "Garden";
+
+    case RoomId::OvergrownPond:
+        return "Overgrown Pond";
+
+    case RoomId::MainGate:
+        return "Main Gate";
+
+    case RoomId::KitchenEntrance:
+        return "Kitchen Entrance";
+
+    case RoomId::Cemetery:
+        return "Cemetery";
+
+    case RoomId::Mausoleum:
+        return "Mausoleum";
+
+    case RoomId::Tombstones:
+        return "Tombstones";
+
+    case RoomId::CliffTombs:
+        return "Cliff Tombs";
+
+    case RoomId::FancyCorridor01:
+        return "Fancy Corridor";
+
+    case RoomId::BedChamber01:
+        return "Bedchamber";
+
+    case RoomId::GreatChamber:
+        return "Great Chamber";
+
+    case RoomId::Library:
+        return "Library";
+
+    case RoomId::HallOfPortraits:
+        return "Hall of Portraits";
+
+    case RoomId::AudienceHall:
+        return "Audience Hall";
+
+    case RoomId::Treasury:
+        return "Treasury";
+
+    case RoomId::Bathroom:
+        return "Bathroom";
+
+    case RoomId::ChildrensRoom:
+        return "Children's Room";
+
+    case RoomId::Stairway2ndFloor:
+        return "Second Floor Stairway";
+
+    case RoomId::TrophyRoom:
+        return "Trophy Room";
+
+    case RoomId::GuestBedroom:
+        return "Guest Bedroom";
+
+    case RoomId::FancyCorridor02:
+        return "Fancy Corridor";
+
+    case RoomId::Reliquary:
+        return "Reliquary";
+
+    case RoomId::Observatory:
+        return "Observatory";
+
+    case RoomId::Skybridge:
+        return "Skybridge";
+
+    case RoomId::ToymakersWorkshop:
+        return "Toymaker's Workshop";
+
+    case RoomId::DrawingRoom:
+        return "Drawing Room";
+
+    case RoomId::ScientificLaboratory:
+        return "Scientific Laboratory";
+
+    case RoomId::OutsideGates:
+        return "Outside the Gates";
+
+    default:
+        return "Unknown";
+    }
+}
+
 }

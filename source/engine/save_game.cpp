@@ -42,19 +42,59 @@ namespace
     };
 
     static_assert(sizeof(SaveData) <= 256, "Save data has grown past a sane SRAM footprint");
+
+    // The slot save()/load_game()/start_new_game() operate on — set by
+    // whichever of the latter two ran most recently, so every autosave
+    // during play lands in the slot the player actually picked at the title
+    // screen without threading a slot parameter through every save() call
+    // site (there's only ever one active game per session anyway).
+    int active_slot = 0;
+
+    int slot_offset(int slot)
+    {
+        return slot * int(sizeof(SaveData));
+    }
 }
 
-bool SaveGame::save_exists()
+bool SaveGame::save_exists(int slot)
 {
     SaveData data{};
-    bn::sram::read(data);
+    bn::sram::read_offset(data, slot_offset(slot));
     return data.magic == magic;
 }
 
-RoomId SaveGame::load_or_new_game()
+bool SaveGame::any_save_exists()
+{
+    for(int i = 0; i < slot_count; ++i)
+    {
+        if(save_exists(i))
+        {
+            return true;
+        }
+    }
+
+    return false;
+}
+
+RoomId SaveGame::peek_room(int slot)
 {
     SaveData data{};
-    bn::sram::read(data);
+    bn::sram::read_offset(data, slot_offset(slot));
+
+    if(data.magic != magic)
+    {
+        return RoomId::OutsideGates;
+    }
+
+    return RoomId(data.current_room);
+}
+
+RoomId SaveGame::load_game(int slot)
+{
+    active_slot = slot;
+
+    SaveData data{};
+    bn::sram::read_offset(data, slot_offset(slot));
 
     if(data.magic != magic)
     {
@@ -86,6 +126,11 @@ RoomId SaveGame::load_or_new_game()
     return RoomId(data.current_room);
 }
 
+void SaveGame::start_new_game(int slot)
+{
+    active_slot = slot;
+}
+
 void SaveGame::save(RoomId current_room)
 {
     SaveData data{};
@@ -115,7 +160,7 @@ void SaveGame::save(RoomId current_room)
         data.room_state[i] = room(RoomId(i)).save_state();
     }
 
-    bn::sram::write(data);
+    bn::sram::write_offset(data, slot_offset(active_slot));
 }
 
 }

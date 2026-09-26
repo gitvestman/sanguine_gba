@@ -32,28 +32,53 @@ int main()
     // has room to spare.
     BN_DATA_EWRAM static sg::RoomScreen screen;
 
-    // Phase 4g's title screen: New Game always starts fresh at
-    // OutsideGates — the coach-ride intro's actual destination, same as
-    // the source project (every room/GameState/Inventory singleton is
-    // already at its just-constructed default — nothing to reset);
-    // Continue is only offered, and only actually loads SRAM, if a save
-    // exists.
-    bool has_save = sg::SaveGame::save_exists();
-    int picked = screen.show_title_screen(has_save);
+    // Phase 4g's title screen, now with 3 save slots (matching the source's
+    // MAX_SAVE_SLOTS): New Game always starts fresh at OutsideGates — the
+    // coach-ride intro's actual destination, same as the source project
+    // (every room/GameState/Inventory singleton is already at its
+    // just-constructed default — nothing to reset); Continue is only
+    // offered, and its slot picker only lists occupied slots, if any slot
+    // has a save. The "press A" splash shows once; backing out of the
+    // slot picker with B loops back to just the New Game/Continue menu,
+    // not the splash again.
+    screen.show_title_card();
+
     sg::RoomId start = sg::RoomId::OutsideGates;
 
-    if(has_save && picked == 1)
+    while(true)
     {
-        start = sg::SaveGame::load_or_new_game();
-    }
-    else
-    {
+        bool has_save = sg::SaveGame::any_save_exists();
+        int picked = screen.choose_new_or_continue(has_save);
+
+        if(has_save && picked == 1)
+        {
+            int slot = screen.choose_save_slot(true);
+
+            if(slot < 0)
+            {
+                continue;
+            }
+
+            start = sg::SaveGame::load_game(slot);
+            break;
+        }
+
+        int slot = screen.choose_save_slot(false);
+
+        if(slot < 0)
+        {
+            continue;
+        }
+
+        sg::SaveGame::start_new_game(slot);
+
         // Matches the source project's starting bag (character_select_
         // room.gd's CHARACTER_SELECT_FLINTLOCK_DESCRIPTION) — every
         // character in this build carries the pistol, since there's no
         // character-select step here to choose a different starting item.
         sg::Inventory::instance().add(sg::ItemId::FLINTLOCK);
         screen.show_intro();
+        break;
     }
 
     // The stats/item sidebars (including the character portrait) stay

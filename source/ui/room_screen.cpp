@@ -424,7 +424,7 @@ void RoomScreen::set_sidebars_visible(bool visible)
     _panel.set_visible(visible);
 }
 
-int RoomScreen::_choose_centered(const bn::ivector<bn::string<40>>& options)
+int RoomScreen::_choose_centered(const bn::ivector<bn::string<40>>& options, bool cancelable)
 {
     int selected = 0;
     bn::vector<bn::sprite_ptr, 8 * 4> sprites;
@@ -482,6 +482,13 @@ int RoomScreen::_choose_centered(const bn::ivector<bn::string<40>>& options)
             bn::core::update();
             return selected;
         }
+
+        if(cancelable && bn::keypad::b_pressed())
+        {
+            // Same stale-press consuming as the A case above.
+            bn::core::update();
+            return -1;
+        }
     }
 }
 
@@ -507,7 +514,7 @@ void RoomScreen::_wait_for_a(const bn::string_view& text, bn::fixed y)
     }
 }
 
-int RoomScreen::show_title_screen(bool has_save)
+void RoomScreen::show_title_card()
 {
     set_sidebars_visible(false);
 
@@ -517,7 +524,10 @@ int RoomScreen::show_title_screen(bool has_save)
 
     _background.reset();
     _background = bn::regular_bg_items::castle_menu.create_bg(0, 0);
+}
 
+int RoomScreen::choose_new_or_continue(bool has_save)
+{
     bn::vector<bn::string<40>, 2> labels;
     labels.push_back(bn::string<40>("New Game"));
 
@@ -527,6 +537,47 @@ int RoomScreen::show_title_screen(bool has_save)
     }
 
     return _choose_centered(labels);
+}
+
+int RoomScreen::choose_save_slot(bool only_occupied)
+{
+    bn::vector<bn::string<40>, SaveGame::slot_count> labels;
+    bn::vector<int, SaveGame::slot_count> slot_ids;
+
+    for(int i = 0; i < SaveGame::slot_count; ++i)
+    {
+        bool exists = SaveGame::save_exists(i);
+
+        if(only_occupied && ! exists)
+        {
+            continue;
+        }
+
+        bn::string<40> label = "Slot ";
+        label.append(bn::to_string<4>(i + 1));
+
+        if(exists)
+        {
+            label.append(" - ");
+            label.append(room_short_name(SaveGame::peek_room(i)));
+        }
+        else
+        {
+            label.append(" - Empty");
+        }
+
+        labels.push_back(label);
+        slot_ids.push_back(i);
+    }
+
+    int picked = _choose_centered(labels, true);
+
+    if(picked < 0)
+    {
+        return -1;
+    }
+
+    return slot_ids[picked];
 }
 
 void RoomScreen::show_intro()
