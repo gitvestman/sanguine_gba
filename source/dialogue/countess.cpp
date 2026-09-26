@@ -89,7 +89,15 @@ void Countess::on_choice_selected(int id, RoomScreen& screen)
 
     case ATTACK:
     case ATTACK_BEHIND:
-        Combat::fight(screen, EnemyId::Countess);
+        // Only her FancyCorridor01 fight has this limit (countess_hostile.gd's
+        // check_corridor_flee() checks the current room) — DinnerHall's own
+        // "Attack her" calls Combat::fight directly, without this parameter,
+        // so that one stays a real fight to the death.
+        if(Combat::fight(screen, EnemyId::Countess, 2) == CombatResult::ENEMY_FLED)
+        {
+            _hiding_in_guest_bedroom = true;
+        }
+
         break;
 
     default:

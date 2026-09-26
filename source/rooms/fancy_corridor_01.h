@@ -6,9 +6,9 @@
 
 // Ported from D:\Workspace\Godot\sanguine\rooms\fancy_corridor_01.gd — the
 // Second Floor's 7-door hub, and the Countess's first appearance. Her
-// dinner-invitation branch (which feeds DinnerHall's Countess dinner scene
-// and GuestBedroom's hiding branch, both cut in Phase 4b) is trimmed away:
-// declining to fight her here just lets her go, with no later ambush.
+// dinner invitation (DinnerHall) and fleeing-to-GuestBedroom branches are
+// both real; declining the dinner invitation still just lets her go, same
+// as the source's DINNER_DECLINE.
 namespace sg::rooms
 {
 

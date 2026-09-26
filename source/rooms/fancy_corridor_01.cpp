@@ -13,13 +13,14 @@ namespace
         "A fancy corridor lined with faded tapestries. Doors lead in every direction.";
     constexpr bn::string_view short_description = "The fancy corridor.";
 
-    // False once she's gone (dead, let go peacefully, or off waiting in
-    // DinnerHall for a dinner she was invited to) — any of those means
-    // she's no longer lingering in this corridor.
+    // False once she's gone (dead, let go peacefully, off waiting in
+    // DinnerHall for a dinner she was invited to, or fled to hide in
+    // GuestBedroom after two hits) — any of those means she's no longer
+    // lingering in this corridor.
     bool countess_active(const dialogue::Countess& countess)
     {
         return ! enemy(EnemyId::Countess).is_dead() && ! countess.resolved() &&
-               ! countess.dinner_pending();
+               ! countess.dinner_pending() && ! countess.hiding_in_guest_bedroom();
     }
 }
 
@@ -41,7 +42,8 @@ void FancyCorridor01::on_enter(RoomScreen& screen)
         _countess_met = true;
         screen.show_text("A pale woman in a black gown stands in the corridor, as if she'd "
                           "been expecting you.");
-        _countess.talk(screen, "\"Good evening,\" she says.", &bn::sprite_items::enemy_countess);
+        _countess.talk(screen, "\"Good evening,\" she says.", &bn::sprite_items::enemy_countess, 1,
+                       false);
     }
 }
 
@@ -104,7 +106,8 @@ void FancyCorridor01::on_choice(int action_id, RoomScreen& screen)
         break;
 
     case 8:
-        _countess.talk(screen, "\"Back again?\" she asks.", &bn::sprite_items::enemy_countess);
+        _countess.talk(screen, "\"Back again?\" she asks.", &bn::sprite_items::enemy_countess, 1,
+                       false);
         break;
 
     default:
@@ -118,6 +121,7 @@ uint16_t FancyCorridor01::save_state() const
     if(_countess_met) bits |= 1 << 1;
     if(_countess.resolved()) bits |= 1 << 2;
     if(_countess.dinner_pending()) bits |= 1 << 3;
+    if(_countess.hiding_in_guest_bedroom()) bits |= 1 << 4;
     return bits;
 }
 
@@ -127,6 +131,7 @@ void FancyCorridor01::load_state(uint16_t bits)
     _countess_met = bits & (1 << 1);
     _countess.set_resolved(bits & (1 << 2));
     _countess.set_dinner_pending(bits & (1 << 3));
+    _countess.set_hiding_in_guest_bedroom(bits & (1 << 4));
 }
 
 }

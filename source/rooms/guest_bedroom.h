@@ -3,11 +3,12 @@
 
 #include "../engine/room.h"
 
-// Ported from D:\Workspace\Godot\sanguine\rooms\guest_bedroom.gd. The
-// Countess-hiding-here branch (set by DinnerHall's "dine with her" choice
-// in the source project — cut from our DinnerHall in Phase 4b, and the
-// Countess herself isn't ported until Phase 4e) is left out for the same
-// reason as FancyCorridor01's Countess intro.
+// Ported from D:\Workspace\Godot\sanguine\rooms\guest_bedroom.gd, including
+// the Countess-hiding-here branch: fleeing her FancyCorridor01 fight (see
+// Combat::fight's flee_after_hits) sends her here instead of resolving the
+// encounter — dialogue::Countess::hiding_in_guest_bedroom() is the shared
+// flag (owned by FancyCorridor01, same cross-room-read pattern DinnerHall
+// already uses for dinner_pending()).
 namespace sg::rooms
 {
 

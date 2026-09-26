@@ -17,7 +17,13 @@ class RoomScreen;
 enum class CombatResult
 {
     WON,
-    FLED
+    FLED,
+
+    // The enemy fled instead of the player — see `flee_after_hits` below.
+    // Not dead (is_dead() stays false), so the caller decides what "gone"
+    // means for that specific encounter (FancyCorridor01's Countess just
+    // marks herself resolved(), same as if she'd been let go peacefully).
+    ENEMY_FLED
 };
 
 class Combat
@@ -31,7 +37,14 @@ public:
     // the one visible difference is that fleeing and re-entering the fight
     // gives a fresh, undamaged enemy instead of picking up where it left
     // off.
-    static CombatResult fight(RoomScreen& screen, EnemyId enemy_id);
+    //
+    // `flee_after_hits`, when > 0, makes the enemy flee on what would have
+    // been its next turn once the player has landed that many direct hits
+    // (misses don't count) — mirrors the Countess's countess_hostile.gd
+    // check_corridor_flee(), which only fires while she's fought in
+    // FancyCorridor01 specifically (her DinnerHall fight is a real fight to
+    // the death, so that call site passes 0).
+    static CombatResult fight(RoomScreen& screen, EnemyId enemy_id, int flee_after_hits = 0);
 };
 
 }

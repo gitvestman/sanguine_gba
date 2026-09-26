@@ -24,7 +24,7 @@ namespace
     constexpr int flee_id = 4;
 }
 
-CombatResult Combat::fight(RoomScreen& screen, EnemyId enemy_id)
+CombatResult Combat::fight(RoomScreen& screen, EnemyId enemy_id, int flee_after_hits)
 {
     Enemy& target = enemy(enemy_id);
     target.reset_hp();
@@ -36,6 +36,26 @@ CombatResult Combat::fight(RoomScreen& screen, EnemyId enemy_id)
     intro.append(".\n\n");
     intro.append(target.description);
     screen.show_text(intro);
+
+    int hits_landed = 0;
+
+    // Replaces the enemy's next do_action() once flee_after_hits is reached
+    // (see combat.h) — currently only ever passed for the Countess's
+    // FancyCorridor01 fight, hence the Countess-specific flavor text and the
+    // -1 Sanity hit, matching check_corridor_flee()/COUNTESS_CORRIDOR_FLEE.
+    auto maybe_enemy_flee = [&]
+    {
+        if(flee_after_hits <= 0 || hits_landed < flee_after_hits)
+        {
+            return false;
+        }
+
+        screen.show_text("Overwhelmed, the Countess wails in fury and fear. Shadows swirl "
+                          "around her, and she is gone.");
+        GameState::instance().change_sanity(-1);
+        screen.hide_enemy();
+        return true;
+    };
 
     while(true)
     {
@@ -101,6 +121,7 @@ CombatResult Combat::fight(RoomScreen& screen, EnemyId enemy_id)
                 {
                     int hit_damage = rng().get_int(3, 8);
                     target.take_player_damage(hit_damage);
+                    ++hits_landed;
 
                     bn::string<64> text = "And hits for ";
                     text.append(bn::to_string<8>(hit_damage));
@@ -125,6 +146,11 @@ CombatResult Combat::fight(RoomScreen& screen, EnemyId enemy_id)
                 screen.show_text(text);
                 screen.hide_enemy();
                 return CombatResult::WON;
+            }
+
+            if(maybe_enemy_flee())
+            {
+                return CombatResult::ENEMY_FLED;
             }
 
             target.do_action(screen);
@@ -166,6 +192,7 @@ CombatResult Combat::fight(RoomScreen& screen, EnemyId enemy_id)
             }
 
             target.take_player_damage(hit_damage);
+            ++hits_landed;
 
             bn::string<64> text = "And hits for ";
             text.append(bn::to_string<8>(hit_damage));
@@ -185,6 +212,11 @@ CombatResult Combat::fight(RoomScreen& screen, EnemyId enemy_id)
             screen.show_text(text);
             screen.hide_enemy();
             return CombatResult::WON;
+        }
+
+        if(maybe_enemy_flee())
+        {
+            return CombatResult::ENEMY_FLED;
         }
 
         target.do_action(screen);
