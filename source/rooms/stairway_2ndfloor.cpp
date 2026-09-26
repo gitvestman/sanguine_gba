@@ -2,6 +2,7 @@
 
 #include "../ui/room_screen.h"
 #include "../engine/inventory.h"
+#include "../engine/game_state.h"
 
 namespace sg::rooms
 {
@@ -22,7 +23,6 @@ void Stairway2ndFloor::describe(bn::string<768>& out, bool force_long)
 void Stairway2ndFloor::build_choices(bn::ivector<Choice>& out)
 {
     out.push_back({ "Look", 0 });
-    out.push_back({ "Up", 1 });
     out.push_back({ "Down", 2 });
     out.push_back({ "N", 3 });
 
@@ -50,10 +50,6 @@ void Stairway2ndFloor::on_choice(int action_id, RoomScreen& screen)
         break;
     }
 
-    case 1:
-        screen.show_text("The stairs continue up, further than this build reaches yet.");
-        break;
-
     case 2:
         screen.goto_room(RoomId::Stairway1stFloor);
         break;
@@ -65,7 +61,9 @@ void Stairway2ndFloor::on_choice(int action_id, RoomScreen& screen)
     case 4:
         Inventory::instance().add(ItemId::BASTET_FIGURINE);
         _figurine_taken = true;
-        screen.show_text("You take the small bronze figurine of a cat-headed goddess.");
+        GameState::instance().change_dex(3);
+        screen.show_text("You take the small bronze figurine of a cat-headed goddess. Its "
+                          "presence steadies your hand. You feel nimbler for it.");
         break;
 
     case 5:

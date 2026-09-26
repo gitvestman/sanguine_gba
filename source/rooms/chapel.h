@@ -35,6 +35,16 @@ public:
         _entered_from_ossuary = entered_from_ossuary;
     }
 
+    // Readable cross-room by Ossuary, which must only offer its own "Up"
+    // choice once the gate is actually open — the gate is otherwise a
+    // one-way door from Chapel's side only, and Ossuary is also reachable
+    // directly from CellarHall, so without this check a player could climb
+    // up through a gate they never solved.
+    bool gate_unlocked() const
+    {
+        return _gate_unlocked;
+    }
+
 private:
     bool _searched = false;
     bool _gate_found = false;

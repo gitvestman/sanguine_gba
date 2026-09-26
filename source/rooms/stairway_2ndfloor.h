@@ -3,9 +3,13 @@
 
 #include "../engine/room.h"
 
-// Ported from D:\Workspace\Godot\sanguine\rooms\stairway_2ndfloor.gd. The
-// "go up" exit to Stairway3rdFloor... wait, actually to whatever the
-// Third Floor's own stairway is, is stubbed: Phase 4e's job.
+// Ported from D:\Workspace\Godot\sanguine\rooms\stairway_2ndfloor.gd — the
+// source has no "go up" choice here either (only Down and North); the Third
+// Floor connects via FancyCorridor01's own north exit to FancyCorridor02,
+// not through this stairway. An early "Up" stub speculating otherwise was
+// left in this room past Phase 4e actually wiring up the real Third Floor
+// entrance, letting the player try to go somewhere that was never coming —
+// removed once noticed in play.
 namespace sg::rooms
 {
 

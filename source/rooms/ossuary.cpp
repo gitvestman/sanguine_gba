@@ -24,7 +24,16 @@ void Ossuary::build_choices(bn::ivector<Choice>& out)
 {
     out.push_back({ "Look", 0 });
     out.push_back({ "E", 1 });
-    out.push_back({ "Up", 5 });
+
+    // Only a real way back once the gate above is actually open — Ossuary
+    // is also reachable directly from CellarHall, so without this check a
+    // player could climb up through a gate they never solved (the source
+    // project has no "up" choice here at all; the gate is otherwise a
+    // one-way door, only opened from Chapel's side).
+    if(static_cast<Chapel&>(room(RoomId::Chapel)).gate_unlocked())
+    {
+        out.push_back({ "Up", 5 });
+    }
 
     if(! _search_skeleton_key)
     {
