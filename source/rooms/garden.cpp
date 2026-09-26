@@ -74,7 +74,7 @@ void Garden::on_choice(int action_id, RoomScreen& screen)
         break;
 
     case 4:
-        _gnome.talk(screen, "You approach the bush.", &bn::sprite_items::enemy_mad_gnome);
+        _gnome.talk(screen, "You approach the bush.", &bn::sprite_items::enemy_mad_gnome, 2);
 
         if(enemy(EnemyId::MadGnome).is_dead())
         {

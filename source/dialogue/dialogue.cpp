@@ -53,14 +53,15 @@ void Dialogue::hide_dialogue(int id)
 }
 
 void Dialogue::talk(RoomScreen& screen, const bn::string_view& opening_line,
-                     const bn::sprite_item* portrait)
+                     const bn::sprite_item* portrait, bn::fixed portrait_scale,
+                     bool show_leave_fallback)
 {
     _choices.clear();
     initialize_choices();
 
     if(portrait)
     {
-        screen.show_overlay_sprite(*portrait);
+        screen.show_overlay_sprite(*portrait, portrait_scale);
     }
 
     screen.show_text(opening_line);
@@ -79,16 +80,25 @@ void Dialogue::talk(RoomScreen& screen, const bn::string_view& opening_line,
             }
         }
 
-        labels.push_back(bn::string<40>("Leave"));
+        // Only synthesize the fallback when the conversation's own choices
+        // have actually run out (ids empty) — otherwise, if the caller asked
+        // for it, it's always offered too. Either way, once appended it's
+        // the one at labels.size()-1 with no matching ids entry.
+        bool has_fallback = show_leave_fallback || ids.empty();
 
-        if(labels.size() == 1)
+        if(has_fallback)
+        {
+            labels.push_back(bn::string<40>("Leave"));
+        }
+
+        if(labels.empty())
         {
             break;
         }
 
         int picked = screen.choose(labels);
 
-        if(picked == labels.size() - 1)
+        if(has_fallback && picked == labels.size() - 1)
         {
             break;
         }

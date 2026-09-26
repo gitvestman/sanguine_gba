@@ -81,8 +81,9 @@ public:
 
     // Same overlay slot, generalized for a dialogue NPC's portrait
     // (Dialogue::talk) — combat and dialogue never overlap, so one shared
-    // sprite slot covers both without needing two.
-    void show_overlay_sprite(const bn::sprite_item& item);
+    // sprite slot covers both without needing two. `scale` enlarges small
+    // source art (see MadGnome's portrait).
+    void show_overlay_sprite(const bn::sprite_item& item, bn::fixed scale = 1);
     void hide_overlay_sprite();
 
     // Switches the current room: shows `transition_text` first if non-empty,

@@ -172,7 +172,12 @@ namespace
 
 void RoomScreen::show_enemy(EnemyId id)
 {
-    show_overlay_sprite(enemy_sprite_item(id));
+    // MadGnome's source art is unusually small next to every other enemy's
+    // (18x41 before convert_enemy_sprite.py fits it into the usual 32x32
+    // box) — doubled here too, matching its Dialogue::talk portrait scale.
+    // The Rat's 2x is set below, alongside its floor-dash animation.
+    bn::fixed scale = (id == EnemyId::MadGnome) ? 2 : 1;
+    show_overlay_sprite(enemy_sprite_item(id), scale);
 
     _enemy_anim = enemy_anim_kind(id);
     _anim_frame = 0;
@@ -203,9 +208,10 @@ void RoomScreen::hide_enemy()
     hide_overlay_sprite();
 }
 
-void RoomScreen::show_overlay_sprite(const bn::sprite_item& item)
+void RoomScreen::show_overlay_sprite(const bn::sprite_item& item, bn::fixed scale)
 {
     _enemy_sprite = item.create_sprite(0, -8);
+    _enemy_sprite->set_scale(scale);
     _enemy_anim = EnemyAnim::NONE;
 }
 

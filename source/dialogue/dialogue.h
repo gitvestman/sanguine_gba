@@ -5,6 +5,7 @@
 #include "bn_string.h"
 #include "bn_string_view.h"
 #include "bn_sprite_item.h"
+#include "bn_fixed.h"
 
 #include "../ui/room_screen.h"
 
@@ -32,13 +33,23 @@ public:
     virtual ~Dialogue() = default;
 
     // Shows the opening line, then loops choose()/show reply/
-    // on_choice_selected() until a QUIT choice is picked or nothing but
-    // "Leave" remains. `portrait`, when given, is overlaid on the room
-    // background for the whole conversation (same slot Combat::fight uses
-    // for its enemy sprite) — omit it for an NPC with no dedicated art
-    // (e.g. Prisoner, which the source project never gave one either).
+    // on_choice_selected() until a QUIT choice is picked or no choices
+    // remain. `portrait`, when given, is overlaid on the room background
+    // for the whole conversation (same slot Combat::fight uses for its
+    // enemy sprite) — omit it for an NPC with no dedicated art (e.g.
+    // Prisoner, which the source project never gave one either).
+    // `portrait_scale` enlarges small source art (see MadGnome, whose
+    // portrait would otherwise read as tiny next to every other NPC).
+    // `show_leave_fallback` adds a no-consequence "Leave" choice whenever
+    // the conversation's own defined choices run out — the source project's
+    // dialogue.gd has no such automatic fallback at all, so a tree that
+    // already defines its own way out (see Countess's "Take your leave" ->
+    // dinner invitation) should pass false, or the auto-added "Leave" sits
+    // right next to the real exit as a silent decoy that skips whatever
+    // that real choice was about to trigger.
     void talk(RoomScreen& screen, const bn::string_view& opening_line,
-              const bn::sprite_item* portrait = nullptr);
+              const bn::sprite_item* portrait = nullptr, bn::fixed portrait_scale = 1,
+              bool show_leave_fallback = true);
 
 protected:
     // GhostlyBride pre-registers every node of its branching tree up front
