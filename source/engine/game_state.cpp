@@ -108,6 +108,11 @@ void GameState::change_luck(int delta)
     set_stat(Attribute::LUCK, stat(Attribute::LUCK) + delta);
 }
 
+void GameState::change_dex(int delta)
+{
+    set_stat(Attribute::DEX, stat(Attribute::DEX) + delta);
+}
+
 int GameState::enemy_to_hit_bonus() const
 {
     return roll_needed_per_difficulty[int(_difficulty)];

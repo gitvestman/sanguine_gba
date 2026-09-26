@@ -45,6 +45,12 @@ public:
     void change_sanity(int delta);
     void change_luck(int delta);
 
+    // Permanent stat bump some items grant once, on pickup (see
+    // Stairway2ndFloor's Bastet Figurine) — mirrors GameState.change_dex,
+    // which deliberately never recomputes DC even though DC is derived from
+    // DEX at character creation (change_dc is a separate, unrelated call).
+    void change_dex(int delta);
+
     bool is_dead() const
     {
         return stat(Attribute::HP) <= 0;

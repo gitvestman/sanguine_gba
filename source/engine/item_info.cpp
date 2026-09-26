@@ -36,7 +36,7 @@ namespace
         { "Journal", "A stranger's journal, its later pages lost to frantic scrawl." },
         { "Strange Figurine", "A carved figurine of an unfamiliar shape." },
         { "Porcelain Doll", "A porcelain doll with an eerily lifelike painted face." },
-        { "Bastet Figurine", "A small bronze figurine of a cat-headed goddess." },
+        { "Bastet Figurine", "A small bronze figurine of a cat-headed goddess. Steadies your hand." },
         { "Sheet Music", "A folded, hand-written sheet of music." },
         { "Toy Soldier", "A small clockwork toy soldier, still ticking faintly." },
     };
