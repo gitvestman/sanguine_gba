@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+<title>Sanguine (GBA) - Test Build</title>
+<style>
+    html, body {
+        margin: 0;
+        padding: 0;
+        background: #000;
+        color: #ccc;
+        font-family: sans-serif;
+        height: 100%;
+    }
+    #controls-note {
+        text-align: center;
+        font-size: 13px;
+        padding: 6px 0;
+    }
+    #game {
+        width: 100%;
+        height: calc(100% - 30px);
+    }
+</style>
+</head>
+<body>
+<div id="controls-note">
+    Keyboard: Arrows = D-pad, X = A, Z = B, Enter = Start, Backspace = Select
+</div>
+<div id="game"></div>
+
+<script>
+    EJS_player = "#game";
+    EJS_core = "gba";
+    EJS_gameName = "Sanguine";
+    EJS_color = "#7a1f2b";
+    EJS_gameUrl = "game.gba";
+    EJS_pathtodata = "https://cdn.emulatorjs.org/stable/data/";
+    EJS_startOnLoaded = true;
+</script>
+<script src="https://cdn.emulatorjs.org/stable/data/loader.js"></script>
+</body>
+</html>
