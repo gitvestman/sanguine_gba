@@ -1,6 +1,8 @@
 #ifndef SG_INVENTORY_H
 #define SG_INVENTORY_H
 
+#include "bn_vector.h"
+
 // Minimal stand-in for GameState's item table (gamestate_singleton.gd's
 // `items`/ItemId/add_item/has_item). Only the items the Basement floor's
 // locked doors and skill-check rewards actually reference are listed;
@@ -42,14 +44,41 @@ public:
         return _owned[int(item)];
     }
 
+    // The order items were actually picked up in, oldest first — the item
+    // sidebar and the inventory browser both read this (reversed, so the
+    // most recently found item shows first/topmost) instead of walking
+    // ItemId in its fixed enum order, so a player can tell what they just
+    // found at a glance instead of it jumping to wherever that ItemId
+    // happens to sit in the list.
+    const bn::ivector<ItemId>& discovery_order() const
+    {
+        return _discovery_order;
+    }
+
     void add(ItemId item)
     {
-        _owned[int(item)] = true;
+        if(! _owned[int(item)])
+        {
+            _owned[int(item)] = true;
+            _discovery_order.push_back(item);
+        }
     }
 
     void remove(ItemId item)
     {
-        _owned[int(item)] = false;
+        if(_owned[int(item)])
+        {
+            _owned[int(item)] = false;
+
+            for(int i = 0; i < _discovery_order.size(); ++i)
+            {
+                if(_discovery_order[i] == item)
+                {
+                    _discovery_order.erase(_discovery_order.begin() + i);
+                    break;
+                }
+            }
+        }
     }
 
     // The flintlock is this build's one item with a per-shot resource
@@ -86,6 +115,7 @@ private:
     Inventory() = default;
 
     bool _owned[int(ItemId::COUNT)] = {};
+    bn::vector<ItemId, int(ItemId::COUNT)> _discovery_order;
     int _flintlock_ammo = 3;
 };
 

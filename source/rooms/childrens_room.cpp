@@ -4,6 +4,8 @@
 #include "../engine/game_state.h"
 #include "../engine/inventory.h"
 
+#include "bn_regular_bg_items_childrens_drawing.h"
+
 namespace sg::rooms
 {
 
@@ -74,8 +76,9 @@ void ChildrensRoom::on_choice(int action_id, RoomScreen& screen)
     case 3:
         _drawing_seen = true;
         GameState::instance().change_sanity(-1);
-        screen.show_text("The longer you look, the more the smile seems to move. You lose 1 "
-                          "Sanity.");
+        screen.show_special_image(bn::regular_bg_items::childrens_drawing,
+                                   "The longer you look, the more the smile seems to move. You "
+                                   "lose 1 Sanity.");
         break;
 
     case 4:

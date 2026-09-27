@@ -20,6 +20,7 @@ public:
     void on_choice(int action_id, RoomScreen& screen) override;
     void on_enter(RoomScreen& screen) override;
     void build_ambient(bn::ivector<AmbientDecor>& out) const override;
+    const bn::regular_bg_item* background_override() const override;
     uint16_t save_state() const override;
     void load_state(uint16_t bits) override;
 

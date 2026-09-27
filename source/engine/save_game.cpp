@@ -109,6 +109,11 @@ RoomId SaveGame::load_game(int slot)
 
     Inventory& inventory = Inventory::instance();
 
+    // inventory_mask has no concept of pickup order, so a loaded save's
+    // discovery_order() just ends up in plain ItemId order — a cosmetic
+    // difference from a save actually played through, not a correctness
+    // issue (nothing depends on it beyond the sidebar/browser's own
+    // ordering).
     for(int i = 0; i < int(ItemId::COUNT); ++i)
     {
         if(data.inventory_mask & (1 << i))

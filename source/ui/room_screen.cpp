@@ -73,14 +73,14 @@ namespace
 
     void build_owned_items(bn::ivector<ItemId>& out)
     {
-        Inventory& inventory = Inventory::instance();
+        // Most recently found first (see Inventory::discovery_order), so
+        // the newest item lands in the sidebar's topmost slot — capped at
+        // `out`'s own capacity (ItemBar::max_icons), same as before.
+        const bn::ivector<ItemId>& order = Inventory::instance().discovery_order();
 
-        for(int i = 0; i < int(ItemId::COUNT) && ! out.full(); ++i)
+        for(int i = order.size() - 1; i >= 0 && ! out.full(); --i)
         {
-            if(inventory.has(ItemId(i)))
-            {
-                out.push_back(ItemId(i));
-            }
+            out.push_back(order[i]);
         }
     }
 }
@@ -344,6 +344,22 @@ void RoomScreen::_refresh_sidebars()
     }
 }
 
+const bn::regular_bg_item& RoomScreen::_room_background(RoomId id) const
+{
+    if(const bn::regular_bg_item* override_item = room(id).background_override())
+    {
+        return *override_item;
+    }
+
+    return background_item(id);
+}
+
+void RoomScreen::refresh_background()
+{
+    _background.reset();
+    _background = _room_background(_current_room).create_bg(0, -10);
+}
+
 void RoomScreen::_enter_room(RoomId id)
 {
     _current_room = id;
@@ -365,7 +381,7 @@ void RoomScreen::_enter_room(RoomId id)
     // 256x256 canvas — see tools/convert_room_bg.py) instead of centering
     // it, so no art is cropped at the top; the bottom panel covers the
     // bottom of the art and the border below it.
-    _background = background_item(id).create_bg(0, -10);
+    _background = _room_background(id).create_bg(0, -10);
     _refresh_ambient(id);
 
     Room& r = room(id);
@@ -379,6 +395,17 @@ void RoomScreen::_enter_room(RoomId id)
     // while it's in progress, this also means a mid-fight death never
     // overwrites the checkpoint from before that fight started.
     SaveGame::save(id);
+}
+
+void RoomScreen::show_special_image(const bn::regular_bg_item& item, const bn::string_view& text)
+{
+    // Same palette-bank reasoning as _enter_room(): release the current
+    // room's background before uploading this one's, and vice versa after.
+    _background.reset();
+    _background = item.create_bg(0, -10);
+    show_text(text);
+    _background.reset();
+    _background = _room_background(_current_room).create_bg(0, -10);
 }
 
 void RoomScreen::_refresh_ambient(RoomId id)
@@ -833,13 +860,11 @@ void RoomScreen::_open_inventory()
     while(true)
     {
         bn::vector<ItemId, int(ItemId::COUNT)> items;
+        const bn::ivector<ItemId>& order = Inventory::instance().discovery_order();
 
-        for(int i = 0; i < int(ItemId::COUNT); ++i)
+        for(int i = order.size() - 1; i >= 0; --i)
         {
-            if(Inventory::instance().has(ItemId(i)))
-            {
-                items.push_back(ItemId(i));
-            }
+            items.push_back(order[i]);
         }
 
         if(items.empty())

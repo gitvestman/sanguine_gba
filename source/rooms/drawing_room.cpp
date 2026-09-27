@@ -4,6 +4,7 @@
 #include "../engine/combat.h"
 
 #include "bn_sprite_items_enemy_night_raven.h"
+#include "bn_regular_bg_items_drawing_room_no_raven.h"
 
 namespace sg::rooms
 {
@@ -129,7 +130,11 @@ void DrawingRoom::on_choice(int action_id, RoomScreen& screen)
     case 3:
         Combat::fight(screen, EnemyId::NightRaven);
 
-        if(! enemy(EnemyId::NightRaven).is_dead())
+        if(enemy(EnemyId::NightRaven).is_dead())
+        {
+            screen.refresh_background();
+        }
+        else
         {
             screen.show_overlay_sprite(bn::sprite_items::enemy_night_raven);
         }
@@ -164,6 +169,7 @@ void DrawingRoom::on_choice(int action_id, RoomScreen& screen)
     case 6:
         _raven_gone = true;
         screen.hide_overlay_sprite();
+        screen.refresh_background();
         screen.show_text("You toss down a bright bauble. The creature snatches it up and "
                           "flees through a gap in the ceiling.");
         break;
@@ -177,6 +183,7 @@ void DrawingRoom::on_choice(int action_id, RoomScreen& screen)
         {
             _raven_gone = true;
             screen.hide_overlay_sprite();
+            screen.refresh_background();
             screen.show_text("You lunge and shout. Startled, it bolts through a gap in the "
                               "ceiling.");
         }
@@ -192,6 +199,16 @@ void DrawingRoom::on_choice(int action_id, RoomScreen& screen)
     default:
         break;
     }
+}
+
+const bn::regular_bg_item* DrawingRoom::background_override() const
+{
+    if(raven_resolved(_raven_gone))
+    {
+        return &bn::regular_bg_items::drawing_room_no_raven;
+    }
+
+    return nullptr;
 }
 
 void DrawingRoom::build_ambient(bn::ivector<AmbientDecor>& out) const

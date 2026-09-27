@@ -147,6 +147,16 @@ public:
     // rooms have none, hence the no-op default.
     virtual void build_ambient(bn::ivector<AmbientDecor>& /*out*/) const {}
 
+    // Lets a room swap its own background based on internal state instead
+    // of the fixed per-RoomId mapping background_item() returns — e.g.
+    // DrawingRoom's candles-with-no-bird art once the Night Raven is gone
+    // (get_image()/image_noraven in the source). nullptr (the default)
+    // means "use background_item(id) as normal".
+    virtual const bn::regular_bg_item* background_override() const
+    {
+        return nullptr;
+    }
+
     // Packs/restores this room's whole persistent state (visited plus every
     // subclass-specific flag) into/from a single byte for SaveGame — every
     // room in this floor fits its own state in a handful of bits. Bit 0 is

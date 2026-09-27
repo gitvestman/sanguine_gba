@@ -80,6 +80,21 @@ public:
     // as a real parallax effect over the castle art.
     void show_intro();
 
+    // Swaps the current room's background for `item` (e.g. a special
+    // full-screen picture — see ChildrensRoom's drawing/GreatChamber's
+    // journal-style "look at X" beats), shows `text`, then restores the
+    // current room's own background — same create_bg(0, -10) placement
+    // every room background already uses, so a "special image" is really
+    // just a background asset like any room's, swapped in and back out.
+    void show_special_image(const bn::regular_bg_item& item, const bn::string_view& text);
+
+    // Re-applies the current room's background — for a room whose
+    // Room::background_override() can change mid-visit (see DrawingRoom's
+    // no-raven candles art), called right after whatever choice just made
+    // that happen, so the swap is immediate instead of waiting for the next
+    // room re-entry.
+    void refresh_background();
+
     void set_sidebars_visible(bool visible);
 
     // Runs the game forever, starting from `start`.
@@ -148,6 +163,13 @@ private:
     void _enter_room(RoomId id);
     void _refresh_sidebars();
     void _refresh_ambient(RoomId id);
+
+    // background_item(id), unless that room's own background_override()
+    // says otherwise (see DrawingRoom) — the one place that decides which
+    // background a room actually gets, used by both _enter_room() and
+    // show_special_image()'s restore step so neither has to know about
+    // overrides itself.
+    const bn::regular_bg_item& _room_background(RoomId id) const;
 
     // Advances whichever overlay animation is active (see EnemyAnim) by one
     // frame and repositions/re-flips the sprite accordingly — called from
