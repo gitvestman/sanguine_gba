@@ -2,6 +2,7 @@
 
 #include "bn_string.h"
 #include "bn_vector.h"
+#include "bn_sound_items.h"
 
 #include "game_state.h"
 #include "rng.h"
@@ -95,6 +96,17 @@ Result Dice::roll_check(RoomScreen& screen, Attribute attribute, int dc, bool ca
         else
         {
             result = Result::FAIL;
+        }
+
+        // Matches dice_board.gd's good_sound/bad_sound, played the instant
+        // the roll resolves — a critical failure is still a failure here.
+        if(result == Result::SUCCESS)
+        {
+            bn::sound_items::roll_success.play();
+        }
+        else
+        {
+            bn::sound_items::roll_fail.play();
         }
 
         bn::string<64> result_text;
