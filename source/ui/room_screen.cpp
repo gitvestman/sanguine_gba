@@ -111,6 +111,11 @@ void RoomScreen::show_text(const bn::string_view& text)
         _update_enemy_animation();
         _update_ambient();
         bn::core::update();
+
+        if(bn::keypad::start_pressed())
+        {
+            _show_pause_menu();
+        }
     }
 }
 
