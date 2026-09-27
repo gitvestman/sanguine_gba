@@ -3,10 +3,12 @@
 
 #include "../engine/room.h"
 
-// Ported from D:\Workspace\Godot\sanguine\rooms\music_room.gd. The Sheet
-// Music item/reward branch is cut — no such item exists in this build
-// (nothing on this floor grants it), so it would be permanently unreachable
-// dead code rather than a real choice.
+// Ported from D:\Workspace\Godot\sanguine\rooms\music_room.gd. Playing the
+// Sheet Music (granted by GreatChamber, 2nd floor) grants a random item,
+// matching the source's GameState.add_random_item() — this was originally
+// cut as unreachable (Sheet Music didn't exist anywhere in the build yet),
+// but 4d added the item via GreatChamber without ever wiring this payoff
+// back up.
 namespace sg::rooms
 {
 
@@ -23,6 +25,7 @@ public:
 
 private:
     bool _organ_played = false;
+    bool _sheet_music_played = false;
 };
 
 }

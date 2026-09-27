@@ -113,6 +113,11 @@ void GameState::change_dex(int delta)
     set_stat(Attribute::DEX, stat(Attribute::DEX) + delta);
 }
 
+void GameState::change_int(int delta)
+{
+    set_stat(Attribute::INT_, stat(Attribute::INT_) + delta);
+}
+
 int GameState::enemy_to_hit_bonus() const
 {
     return roll_needed_per_difficulty[int(_difficulty)];

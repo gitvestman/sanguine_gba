@@ -51,6 +51,10 @@ public:
     // DEX at character creation (change_dc is a separate, unrelated call).
     void change_dex(int delta);
 
+    // Same pattern as change_dex, for the Mezuzah Amulet's +3 INT (see
+    // MusicRoom's Sheet Music reward) — mirrors GameState.change_int.
+    void change_int(int delta);
+
     bool is_dead() const
     {
         return stat(Attribute::HP) <= 0;

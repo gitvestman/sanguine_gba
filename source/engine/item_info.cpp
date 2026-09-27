@@ -17,6 +17,7 @@
 #include "bn_sprite_items_item_doll.h"
 #include "bn_sprite_items_item_bastet_figurine.h"
 #include "bn_sprite_items_item_toy_soldier.h"
+#include "bn_sprite_items_item_mezuzah_amulet.h"
 
 namespace sg
 {
@@ -39,6 +40,7 @@ namespace
         { "Bastet Figurine", "A small bronze figurine of a cat-headed goddess. Steadies your hand." },
         { "Sheet Music", "A folded, hand-written sheet of music." },
         { "Toy Soldier", "A small clockwork toy soldier, still ticking faintly." },
+        { "Mezuzah Amulet", "A small mezuzah amulet. Wearing it sharpens the mind. +3 INT." },
     };
 }
 
@@ -93,6 +95,9 @@ const bn::sprite_item& item_icon(ItemId item)
 
     case ItemId::TOY_SOLDIER:
         return bn::sprite_items::item_toy_soldier;
+
+    case ItemId::MEZUZAH_AMULET:
+        return bn::sprite_items::item_mezuzah_amulet;
 
     // Sheet Music has no dedicated icon in the source project either;
     // falls back to the Cog's icon rather than adding a placeholder.

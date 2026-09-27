@@ -29,6 +29,7 @@ enum class ItemId
     BASTET_FIGURINE,
     SHEET_MUSIC,
     TOY_SOLDIER,
+    MEZUZAH_AMULET,
 
     COUNT
 };
