@@ -1,12 +1,12 @@
 #include "bn_core.h"
 #include "bn_bg_palettes.h"
-#include "bn_music.h"
 
 #include "ui/room_screen.h"
 #include "engine/rng.h"
 #include "engine/save_game.h"
 #include "engine/settings.h"
 #include "engine/inventory.h"
+#include "engine/music.h"
 
 int main()
 {
@@ -99,10 +99,11 @@ int main()
     // before real gameplay's first room entry.
     screen.set_sidebars_visible(true);
 
-    // The title theme (started in show_title_card()) has no in-game
-    // successor yet (Phase 5b) — stop rather than let it run under actual
-    // gameplay.
-    bn::music::stop();
+    // The title theme (started in show_title_card()) hands off to the
+    // default in-game ambient track here, right as real gameplay begins —
+    // matches the source's GameState.change_state(PLAY) fading intro_music
+    // into game_music.
+    sg::play_default_theme();
 
     screen.run(start);
 }

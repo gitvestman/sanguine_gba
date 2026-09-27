@@ -3,9 +3,13 @@
 #include "../ui/room_screen.h"
 #include "../engine/game_state.h"
 #include "../engine/combat.h"
+#include "../engine/settings.h"
+#include "../engine/music.h"
 #include "fancy_corridor_01.h"
 
 #include "bn_sprite_items_enemy_countess.h"
+#include "bn_music_items.h"
+#include "bn_music.h"
 
 namespace sg::rooms
 {
@@ -142,10 +146,15 @@ void DinnerHall::on_choice(int action_id, RoomScreen& screen)
         countess().set_dinner_pending(false);
         countess().set_resolved(true);
         GameState::instance().change_sanity(1);
+        // Her theme plays for this scene same as it does for any of her
+        // other encounters (Combat::fight handles this itself for "Attack
+        // her" above; this peaceful path has no fight to piggyback on).
+        bn::music::play(bn::music_items::countess_theme, Settings::instance().music_volume());
         screen.show_text("You dine with her, trading pleasantries you don't mean over a "
                           "meal you don't taste. When it's done, she retires without a "
                           "word, seemingly satisfied. You feel steadier for having survived "
                           "it.");
+        play_default_theme();
         break;
 
     default:

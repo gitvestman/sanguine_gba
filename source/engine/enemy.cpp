@@ -16,6 +16,7 @@
 #include "bn_sprite_items_enemy_countess.h"
 #include "bn_sprite_items_enemy_golem.h"
 #include "bn_sprite_items_enemy_night_raven.h"
+#include "bn_music_items.h"
 
 namespace sg
 {
@@ -225,6 +226,16 @@ EnemyAnim enemy_anim_kind(EnemyId id)
     default:
         return EnemyAnim::NONE;
     }
+}
+
+bn::optional<bn::music_item> enemy_music_item(EnemyId id)
+{
+    if(id == EnemyId::Countess)
+    {
+        return bn::music_items::countess_theme;
+    }
+
+    return bn::nullopt;
 }
 
 }

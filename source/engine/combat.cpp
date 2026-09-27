@@ -2,11 +2,14 @@
 
 #include "bn_string.h"
 #include "bn_vector.h"
+#include "bn_music.h"
 
 #include "game_state.h"
 #include "inventory.h"
 #include "item_info.h"
 #include "rng.h"
+#include "settings.h"
+#include "music.h"
 #include "../ui/room_screen.h"
 
 namespace sg
@@ -29,6 +32,24 @@ CombatResult Combat::fight(RoomScreen& screen, EnemyId enemy_id, int flee_after_
     Enemy& target = enemy(enemy_id);
     target.reset_hp();
     screen.show_enemy(enemy_id);
+
+    // A per-enemy boss theme (currently only the Countess) plays for the
+    // fight's duration instead of the default ambient track, resuming it
+    // once the fight ends — see engine/music.h.
+    bn::optional<bn::music_item> theme = enemy_music_item(enemy_id);
+
+    if(theme)
+    {
+        bn::music::play(*theme, Settings::instance().music_volume());
+    }
+
+    auto stop_theme = [&]
+    {
+        if(theme)
+        {
+            play_default_theme();
+        }
+    };
 
     bn::string<256> intro;
     intro.append("You are attacked by ");
@@ -145,11 +166,13 @@ CombatResult Combat::fight(RoomScreen& screen, EnemyId enemy_id, int flee_after_
                 text.append(".");
                 screen.show_text(text);
                 screen.hide_enemy();
+                stop_theme();
                 return CombatResult::WON;
             }
 
             if(maybe_enemy_flee())
             {
+                stop_theme();
                 return CombatResult::ENEMY_FLED;
             }
 
@@ -165,6 +188,7 @@ CombatResult Combat::fight(RoomScreen& screen, EnemyId enemy_id, int flee_after_
             screen.show_text(text);
             target.do_action(screen);
             screen.hide_enemy();
+            stop_theme();
             return CombatResult::FLED;
         }
 
@@ -211,11 +235,13 @@ CombatResult Combat::fight(RoomScreen& screen, EnemyId enemy_id, int flee_after_
             text.append(".");
             screen.show_text(text);
             screen.hide_enemy();
+            stop_theme();
             return CombatResult::WON;
         }
 
         if(maybe_enemy_flee())
         {
+            stop_theme();
             return CombatResult::ENEMY_FLED;
         }
 

@@ -1,8 +1,12 @@
 #include "fancy_corridor_01.h"
 
 #include "../ui/room_screen.h"
+#include "../engine/settings.h"
+#include "../engine/music.h"
 
 #include "bn_sprite_items_enemy_countess.h"
+#include "bn_music_items.h"
+#include "bn_music.h"
 
 namespace sg::rooms
 {
@@ -21,6 +25,21 @@ namespace
     {
         return ! enemy(EnemyId::Countess).is_dead() && ! countess.resolved() &&
                ! countess.dinner_pending() && ! countess.hiding_in_guest_bedroom();
+    }
+
+    // Her theme plays for the whole conversation, not just a fight (matches
+    // the source, which sets the identical track on both countess.gd's
+    // dialogue AND countess_hostile.gd's enemy) — safe to wrap the whole
+    // talk() call even though ATTACK/ATTACK_BEHIND may start a fight of
+    // their own mid-conversation: both are QUIT-type choices, so talk()
+    // never continues after one, and Combat::fight()'s own
+    // play/stop is a harmless redundant restart in that case.
+    void talk_with_theme(dialogue::Countess& countess, RoomScreen& screen,
+                          const bn::string_view& opening_line)
+    {
+        bn::music::play(bn::music_items::countess_theme, Settings::instance().music_volume());
+        countess.talk(screen, opening_line, &bn::sprite_items::enemy_countess, 1, false);
+        play_default_theme();
     }
 }
 
@@ -42,8 +61,7 @@ void FancyCorridor01::on_enter(RoomScreen& screen)
         _countess_met = true;
         screen.show_text("A pale woman in a black gown stands in the corridor, as if she'd "
                           "been expecting you.");
-        _countess.talk(screen, "\"Good evening,\" she says.", &bn::sprite_items::enemy_countess, 1,
-                       false);
+        talk_with_theme(_countess, screen, "\"Good evening,\" she says.");
     }
 }
 
@@ -106,8 +124,7 @@ void FancyCorridor01::on_choice(int action_id, RoomScreen& screen)
         break;
 
     case 8:
-        _countess.talk(screen, "\"Back again?\" she asks.", &bn::sprite_items::enemy_countess, 1,
-                       false);
+        talk_with_theme(_countess, screen, "\"Back again?\" she asks.");
         break;
 
     default:

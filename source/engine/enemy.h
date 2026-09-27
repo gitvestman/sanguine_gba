@@ -3,6 +3,8 @@
 
 #include "bn_string_view.h"
 #include "bn_sprite_item.h"
+#include "bn_optional.h"
+#include "bn_music_item.h"
 
 // Ported from D:\Workspace\Godot\sanguine\enemies\enemy.gd. Every enemy
 // there overrides do_action() only to call the shared attack_player() with
@@ -79,6 +81,12 @@ Enemy& enemy(EnemyId id);
 // The sprite shown overlaid on the room background during Combat::fight —
 // matches the source project's SpriteAnimations.*() enemy art overlay.
 const bn::sprite_item& enemy_sprite_item(EnemyId id);
+
+// A per-enemy boss theme (see countess_hostile.gd's own `music` field) —
+// Combat::fight() plays this instead of nothing for the fight's duration,
+// and nullopt for every enemy without one (most of them; a plain
+// bn::optional rather than a table entry per EnemyId, since so few need it).
+bn::optional<bn::music_item> enemy_music_item(EnemyId id);
 
 // Phase 4i: a handful of small critters get a per-instance overlay
 // animation in the source project (utils/sprite_animations.gd) instead of
