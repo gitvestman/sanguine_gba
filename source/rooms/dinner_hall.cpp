@@ -8,6 +8,7 @@
 #include "fancy_corridor_01.h"
 
 #include "bn_sprite_items_enemy_countess.h"
+#include "bn_regular_bg_items_dinner_clean.h"
 #include "bn_music_items.h"
 #include "bn_music.h"
 
@@ -36,8 +37,15 @@ void DinnerHall::describe(bn::string<768>& out, bool force_long)
 {
     if(dinner_active())
     {
-        out.append("The Countess waits at the head of a lavishly set table, a single "
-                    "place laid across from her.");
+        // Adapted from DINNER_HALL_TRANSFORMED_DARIO — this build hardcodes
+        // one character (Dario), so it always uses his variant rather than
+        // the source's per-character branch (there's no DINNER_HALL_
+        // TRANSFORMED_ISABEL equivalent here, and the generic TRANSFORMED
+        // text is for a dinner_dialogue_class this build doesn't have).
+        out.append("The dining hall has been cleaned recently; a scent of lavender lingers "
+                    "in the air. Two plates sit across from each other, laid out with cold "
+                    "meats, sausage, bread, and cheese - a surprisingly modest spread for "
+                    "someone of the Countess's standing.");
         visited = true;
         return;
     }
@@ -139,6 +147,11 @@ void DinnerHall::on_choice(int action_id, RoomScreen& screen)
             countess().set_resolved(true);
         }
 
+        // dinner_pending() just went false above regardless of outcome
+        // (win, or fleeing the fight back to the ordinary room), so the
+        // clean transformed background (background_override(), tied to
+        // dinner_active()) needs to revert either way.
+        screen.refresh_background();
         break;
 
     case 7:
@@ -155,11 +168,22 @@ void DinnerHall::on_choice(int action_id, RoomScreen& screen)
                           "word, seemingly satisfied. You feel steadier for having survived "
                           "it.");
         play_default_theme();
+        screen.refresh_background();
         break;
 
     default:
         break;
     }
+}
+
+const bn::regular_bg_item* DinnerHall::background_override() const
+{
+    if(dinner_active())
+    {
+        return &bn::regular_bg_items::dinner_clean;
+    }
+
+    return nullptr;
 }
 
 void DinnerHall::build_ambient(bn::ivector<AmbientDecor>& out) const

@@ -5,12 +5,12 @@
 
 // Ported from D:\Workspace\Godot\sanguine\rooms\dinner_hall.gd. The
 // Countess dinner scene is real (restored after user request), but
-// simplified: no per-character unique dinner conversation, and it doesn't
-// set up GuestBedroom's hiding/later-ambush branch (needs a whole extra
-// enemy-hiding system this build doesn't have) — dining with her just
-// resolves the encounter peacefully. What's kept from the original cut is
-// the room's own trap: an INT check against the dread that fills the
-// hall, exactly like every other floor's first-visit hazard.
+// simplified: no per-character unique dinner conversation (this build
+// hardcodes one character, Dario, so it uses the source's
+// DINNER_HALL_TRANSFORMED_DARIO text) — dining with her just resolves the
+// encounter peacefully. What's kept from the original cut is the room's
+// own trap: an INT check against the dread that fills the hall, exactly
+// like every other floor's first-visit hazard.
 namespace sg::rooms
 {
 
@@ -23,6 +23,7 @@ public:
     void on_choice(int action_id, RoomScreen& screen) override;
     void on_enter(RoomScreen& screen) override;
     void build_ambient(bn::ivector<AmbientDecor>& out) const override;
+    const bn::regular_bg_item* background_override() const override;
     uint16_t save_state() const override;
     void load_state(uint16_t bits) override;
 
