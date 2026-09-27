@@ -6,6 +6,7 @@
 #include "bn_algorithm.h"
 #include "bn_math.h"
 #include "bn_utility.h"
+#include "bn_music.h"
 
 #include "common_variable_8x8_sprite_font.h"
 
@@ -18,6 +19,7 @@
 #include "../engine/combat.h"
 #include "../engine/item_info.h"
 
+#include "bn_music_items.h"
 #include "bn_sprite_items_panel_tile.h"
 #include "bn_sprite_items_ambient_torch.h"
 #include "bn_sprite_items_ambient_candle.h"
@@ -523,6 +525,15 @@ void RoomScreen::_wait_for_a(const bn::string_view& text, bn::fixed y)
 void RoomScreen::show_title_card()
 {
     set_sidebars_visible(false);
+
+    // Matches the source's intro_music, played from the title scene's own
+    // _ready() and left running through New Game/Continue and the coach-ride
+    // intro, until GameState.change_state(PLAY) fades into game_music (see
+    // main.cpp, which stops this right before screen.run() begins real
+    // gameplay — this port has no separate in-game music yet, Phase 5b).
+    // bn::music::play() loops by default, which is exactly what a title
+    // theme needs regardless of how long the player lingers on the menu.
+    bn::music::play(bn::music_items::title_theme, Settings::instance().music_volume());
 
     _background.reset();
     _background = bn::regular_bg_items::castle_title.create_bg(0, 0);

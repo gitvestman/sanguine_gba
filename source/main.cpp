@@ -1,5 +1,6 @@
 #include "bn_core.h"
 #include "bn_bg_palettes.h"
+#include "bn_music.h"
 
 #include "ui/room_screen.h"
 #include "engine/rng.h"
@@ -97,6 +98,11 @@ int main()
     // hidden through the title screen and intro — revealed here, right
     // before real gameplay's first room entry.
     screen.set_sidebars_visible(true);
+
+    // The title theme (started in show_title_card()) has no in-game
+    // successor yet (Phase 5b) — stop rather than let it run under actual
+    // gameplay.
+    bn::music::stop();
 
     screen.run(start);
 }

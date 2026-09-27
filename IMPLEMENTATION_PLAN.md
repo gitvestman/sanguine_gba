@@ -393,6 +393,26 @@ milestone per the [Audio](#audio) note above.
   currently is — SRAM (save slots, settings) already reflects the last explicit save, so a
   soft reset back to the title screen loses only the in-progress moment, exactly matching what
   "return to main menu" should do.
+- **5b (partial) — Title theme. DONE**, first of the priority-ordered tracks above. The source's
+  `Respect for bones 3.ogg` is a streamed MP3 the GBA can't decode, so it's re-purposed rather
+  than converted: trimmed to its first 40 seconds and downsampled to mono 8-bit unsigned PCM
+  (10512Hz — ffmpeg: `-t 40 -ac 1 -ar 10512 -f u8`), then wrapped as a minimal Scream Tracker 3
+  module (`tools/wav_to_s3m_loop.py`) that triggers the clip once as a single sample (with its
+  own loop points covering nearly all of it) and never retriggers it again for ~15 minutes of
+  silent filler patterns — long enough that a real play session won't hit the retrigger seam.
+  This is the standard GBA-homebrew trick for reusing pre-recorded audio as `bn::music` without
+  actual composition; the exact S3M byte layout was derived by parsing (not guessing) the
+  already-vendored `third_party/butano/examples/core/audio/soda7_xcopy_ohc.s3m`, and validated
+  by running `mmutil` on the output directly before trusting it in a real build. Wired into
+  `RoomScreen::show_title_card()` (`bn::music::play(bn::music_items::title_theme, Settings::
+  instance().music_volume())`, loops by default) and stopped in `main.cpp` right before
+  `screen.run()` begins real gameplay, matching the source's own intro_music lifetime (title
+  screen through the coach-ride intro, no in-game successor yet). Adds ~430KB to the ROM
+  (2.22MB total) — trimming duration and/or sample rate further directly and linearly reduces
+  this if cart budget gets tight; 40s/10512Hz was a first attempt, not a settled number.
+  **Not verified by ear** — only that `mmutil` parses it and mgba boots without asserting;
+  actual pitch/loop-seam quality (the 40s cut point isn't aligned to any musical
+  beat/zero-crossing) needs a real playtest.
 
 **Phase 6 — Polish and cart budget close-out.** Final ROM size check against the chosen
 target (see below), difficulty-curve pass, credits/ending states (`GAME_WON`/`GAME_OVER`

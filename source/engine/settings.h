@@ -1,6 +1,8 @@
 #ifndef SG_SETTINGS_H
 #define SG_SETTINGS_H
 
+#include "bn_fixed.h"
+
 // Persisted device-level preferences (music/SFX volume) — distinct from
 // SaveGame's 3 save slots, since these describe how loud the game should
 // be, not game progress; they apply regardless of which slot (if any) is
@@ -30,6 +32,11 @@ public:
     {
         return _sfx_volume_step;
     }
+
+    // The current music volume as a [0..1] fraction (step / max_volume_steps)
+    // — for call sites like bn::music::play() that take a volume directly,
+    // so they don't each need to redo this division themselves.
+    bn::fixed music_volume() const;
 
     // Changes take effect immediately (see apply()) and are NOT
     // auto-persisted — call save() once the player is done adjusting

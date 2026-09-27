@@ -45,6 +45,11 @@ Settings& Settings::instance()
     return settings;
 }
 
+bn::fixed Settings::music_volume() const
+{
+    return step_to_volume(_music_volume_step);
+}
+
 void Settings::set_music_volume_step(int step)
 {
     _music_volume_step = step;
@@ -70,7 +75,7 @@ void Settings::apply() const
     // and future bn::sound::play() call with no further wiring needed.
     if(bn::music::playing())
     {
-        bn::music::set_volume(step_to_volume(_music_volume_step));
+        bn::music::set_volume(music_volume());
     }
 
     bn::sound::set_master_volume(step_to_volume(_sfx_volume_step));
