@@ -41,7 +41,8 @@ namespace
         uint16_t room_state[int(RoomId::COUNT)];
     };
 
-    static_assert(sizeof(SaveData) <= 256, "Save data has grown past a sane SRAM footprint");
+    static_assert(sizeof(SaveData) <= SaveGame::slot_size,
+                  "Save data has grown past its reserved SRAM slot size");
 
     // The slot save()/load_game()/start_new_game() operate on — set by
     // whichever of the latter two ran most recently, so every autosave
@@ -52,7 +53,7 @@ namespace
 
     int slot_offset(int slot)
     {
-        return slot * int(sizeof(SaveData));
+        return slot * SaveGame::slot_size;
     }
 }
 

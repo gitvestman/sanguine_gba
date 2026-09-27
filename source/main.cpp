@@ -4,6 +4,7 @@
 #include "ui/room_screen.h"
 #include "engine/rng.h"
 #include "engine/save_game.h"
+#include "engine/settings.h"
 #include "engine/inventory.h"
 
 int main()
@@ -32,6 +33,11 @@ int main()
     // has room to spare.
     BN_DATA_EWRAM static sg::RoomScreen screen;
 
+    // Restores music/SFX volume from SRAM (or leaves both at max, the
+    // just-constructed default, on a first-ever boot) and pushes them to
+    // bn::music/bn::sound right away, before anything else can play.
+    sg::Settings::instance().load();
+
     // Phase 4g's title screen, now with 3 save slots (matching the source's
     // MAX_SAVE_SLOTS): New Game always starts fresh at OutsideGates — the
     // coach-ride intro's actual destination, same as the source project
@@ -49,6 +55,12 @@ int main()
     {
         bool has_save = sg::SaveGame::any_save_exists();
         int picked = screen.choose_new_or_continue(has_save);
+
+        if(picked == 2)
+        {
+            screen.show_settings_menu();
+            continue;
+        }
 
         if(has_save && picked == 1)
         {

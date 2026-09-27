@@ -18,6 +18,14 @@ class SaveGame
 public:
     static constexpr int slot_count = 3;
 
+    // Fixed byte span reserved per slot in SRAM (offset = slot * slot_size),
+    // deliberately bigger than SaveData actually needs right now so it can
+    // keep growing without ever touching this constant — anything else that
+    // reserves its own fixed SRAM block (see engine/settings.h) starts right
+    // after slot_count * slot_size, and must stay in sync with this if it
+    // ever changes.
+    static constexpr int slot_size = 256;
+
     // True if a save from this build's version is present in `slot`.
     static bool save_exists(int slot);
 

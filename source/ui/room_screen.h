@@ -63,6 +63,15 @@ public:
     // choose_new_or_continue() in that case).
     int choose_save_slot(bool only_occupied);
 
+    // A centered Music Volume/SFX Volume/Back menu (see engine/settings.h):
+    // left/right adjusts whichever row is selected, applying live so
+    // adjusting SFX volume is heard immediately; B or picking Back exits,
+    // persisting via Settings::save(). Reachable both from
+    // choose_new_or_continue()'s own "Settings" row and from the in-game
+    // pause menu (see run(), Start), so it's a real screen method rather
+    // than folded into either caller.
+    void show_settings_menu();
+
     // The coach-ride opening, shown once on a fresh New Game before the
     // player's first real choice in ForestCrossing. Cut down hard from the
     // source project's cinematic intro scene (color-shifting sky,
@@ -158,6 +167,17 @@ private:
     // Phase 3's save system to reset room/enemy state cleanly), so this
     // just halts here permanently once it fires.
     void _check_game_over();
+
+    // The in-game pause menu (Start, checked inside choose() — see run()):
+    // Resume/Settings/Main Menu, reusing _choose_centered over whatever
+    // room art and choice list are already on screen (both sit in the
+    // bottom band, well below this menu's centered rows, so nothing is
+    // obscured). "Main Menu" calls bn::core::reset() ([[noreturn]]) rather
+    // than trying to unwind back out of however deep the call stack is
+    // (Combat::fight, Dialogue::talk, ...) — SRAM (save slots, settings)
+    // survives a soft reset, only the in-progress session's state is lost,
+    // which is exactly what returning to the title screen should do anyway.
+    void _show_pause_menu();
 
     // Centered New Game/Continue menu for show_title_screen() — a plain
     // vertical list drawn straight through _text_generator (D-pad up/down,

@@ -13,6 +13,7 @@
 #include "../engine/game_state.h"
 #include "../engine/inventory.h"
 #include "../engine/save_game.h"
+#include "../engine/settings.h"
 #include "../engine/escape.h"
 #include "../engine/combat.h"
 #include "../engine/item_info.h"
@@ -136,6 +137,11 @@ int RoomScreen::choose(const bn::ivector<bn::string<40>>& options)
         if(picked.has_value())
         {
             return picked.value();
+        }
+
+        if(bn::keypad::start_pressed())
+        {
+            _show_pause_menu();
         }
     }
 }
@@ -528,15 +534,28 @@ void RoomScreen::show_title_card()
 
 int RoomScreen::choose_new_or_continue(bool has_save)
 {
-    bn::vector<bn::string<40>, 2> labels;
+    // Fixed ids, not raw list positions — "Settings" must stay identifiable
+    // by main.cpp whether or not "Continue" happens to precede it.
+    constexpr int new_game_id = 0;
+    constexpr int continue_id = 1;
+    constexpr int settings_id = 2;
+
+    bn::vector<bn::string<40>, 3> labels;
+    bn::vector<int, 3> ids;
+
     labels.push_back(bn::string<40>("New Game"));
+    ids.push_back(new_game_id);
 
     if(has_save)
     {
         labels.push_back(bn::string<40>("Continue"));
+        ids.push_back(continue_id);
     }
 
-    return _choose_centered(labels);
+    labels.push_back(bn::string<40>("Settings"));
+    ids.push_back(settings_id);
+
+    return ids[_choose_centered(labels)];
 }
 
 int RoomScreen::choose_save_slot(bool only_occupied)
@@ -578,6 +597,127 @@ int RoomScreen::choose_save_slot(bool only_occupied)
     }
 
     return slot_ids[picked];
+}
+
+void RoomScreen::show_settings_menu()
+{
+    Settings& settings = Settings::instance();
+    int selected = 0;
+    constexpr int row_count = 3;
+
+    auto volume_percent = [](int step)
+    {
+        return step * 100 / Settings::max_volume_steps;
+    };
+
+    bn::vector<bn::sprite_ptr, 8 * 4> sprites;
+
+    auto regenerate = [&]
+    {
+        sprites.clear();
+        _text_generator.set_center_alignment();
+
+        auto row_text = [&](int row, const bn::string_view& label, int percent)
+        {
+            bn::string<40> line = (selected == row) ? bn::string<40>("< ") : bn::string<40>("  ");
+            line.append(label);
+            line.append(bn::to_string<4>(percent));
+            line.append((selected == row) ? "% >" : "%");
+            return line;
+        };
+
+        _text_generator.generate(0, -16, row_text(0, "Music Volume: ",
+                                                    volume_percent(settings.music_volume_step())), sprites);
+        _text_generator.generate(0, 0, row_text(1, "SFX Volume: ",
+                                                 volume_percent(settings.sfx_volume_step())), sprites);
+
+        bn::string<16> back_line = (selected == 2) ? bn::string<16>("> Back") : bn::string<16>("  Back");
+        _text_generator.generate(0, 16, back_line, sprites);
+    };
+
+    regenerate();
+
+    while(true)
+    {
+        bool changed = false;
+
+        if(bn::keypad::down_pressed())
+        {
+            selected = (selected + 1) % row_count;
+            changed = true;
+        }
+        else if(bn::keypad::up_pressed())
+        {
+            selected = (selected - 1 + row_count) % row_count;
+            changed = true;
+        }
+        else if(selected == 0 && bn::keypad::right_pressed())
+        {
+            settings.set_music_volume_step(bn::min(settings.music_volume_step() + 1, Settings::max_volume_steps));
+            changed = true;
+        }
+        else if(selected == 0 && bn::keypad::left_pressed())
+        {
+            settings.set_music_volume_step(bn::max(settings.music_volume_step() - 1, 0));
+            changed = true;
+        }
+        else if(selected == 1 && bn::keypad::right_pressed())
+        {
+            settings.set_sfx_volume_step(bn::min(settings.sfx_volume_step() + 1, Settings::max_volume_steps));
+            changed = true;
+        }
+        else if(selected == 1 && bn::keypad::left_pressed())
+        {
+            settings.set_sfx_volume_step(bn::max(settings.sfx_volume_step() - 1, 0));
+            changed = true;
+        }
+
+        if(changed)
+        {
+            regenerate();
+        }
+
+        bn::core::update();
+
+        if((bn::keypad::a_pressed() && selected == 2) || bn::keypad::b_pressed())
+        {
+            bn::core::update();
+            break;
+        }
+    }
+
+    settings.save();
+}
+
+void RoomScreen::_show_pause_menu()
+{
+    while(true)
+    {
+        bn::vector<bn::string<40>, 3> labels;
+        labels.push_back(bn::string<40>("Resume"));
+        labels.push_back(bn::string<40>("Settings"));
+        labels.push_back(bn::string<40>("Main Menu"));
+
+        int picked = _choose_centered(labels, true);
+
+        if(picked <= 0)
+        {
+            // -1 (B pressed) or 0 (Resume): either way, back to whatever
+            // was already on screen.
+            return;
+        }
+
+        if(picked == 1)
+        {
+            show_settings_menu();
+            continue;
+        }
+
+        // Main Menu: SRAM (save slots, settings) already reflects the last
+        // explicit save()/Settings::save(), so there's nothing to persist
+        // here — just restart clean, same as a power cycle.
+        bn::core::reset();
+    }
 }
 
 void RoomScreen::show_intro()

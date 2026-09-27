@@ -16,7 +16,8 @@ primarily an **asset-pipeline and content-compression problem**, not a redesign.
 rounds of bug fixes/polish already folded back in). 4h (usable inventory), 4i (enemy overlay
 scale/movement/ambient appearance), and 4j (ambient torch/candle flicker, added after 4h/4i on
 the user's own follow-up request) are also now implemented and boot-tested, pending playtest.
-Phase 5 (audio) and Phase 6 (polish + itch.io web build) are not started.
+Phase 5 (audio) is underway — 5a (settings/volume + pause menu) is done; 5b/5c (the actual
+music/SFX content) haven't started. Phase 6 (polish + itch.io web build) is not started.
 
 Grounded in a real look at the source project, not assumptions:
 
@@ -356,6 +357,42 @@ DungeonCreatures/Homunculus were with the Basement in Phases 1–2), not as a se
 
 **Phase 5 — Audio.** Tracker music + compressed SFX, scoped and estimated as its own
 milestone per the [Audio](#audio) note above.
+
+- **5a — Settings (volume/mute) + pause menu. DONE**, started ahead of the music/SFX content
+  itself so the infrastructure exists before there's anything to turn down. Analysis of the
+  source project's actual audio usage (not just its `Sounds/` folder, which is 71MB/49 files
+  but mostly either orphaned `Loops/*.mp3` cues never wired to any `get_music()` override, or
+  a handful of short SFX) found only ~8 real music tracks in play: the title/intro theme
+  (reused for DinnerHall), one generic default loop covering the large majority of unstyled
+  rooms, 5 room-specific tracks (GreatHall/AudienceHall/StoneCorridor/MusicRoom's organ/
+  ChildrensRoom's story-beat swap), and the Countess's boss theme (reused across her dinner
+  scenes too) — recommended as the actual scope for 5b/5c rather than the full 71MB, in that
+  priority order (title+default loop first, Countess second, GreatHall third, the rest as time
+  allows), once composed as short loopable tracker modules (Butano's `bn::music` plays `.mod`/
+  `.s3m`/`.it`/`.xm` via Maxmod — `mmutil` is already in the toolchain — not the source's MP3/
+  OGG streams directly, which have no GBA-side decoder).
+  New `engine/settings.{h,cpp}`: `Settings` persists music/SFX volume (0..4 steps, 25% each) to
+  its own fixed SRAM block, positioned right after the 3 save slots' reserved span
+  (`SaveGame::slot_count * SaveGame::slot_size` — `SaveGame` gained an explicit `slot_size`
+  constant so this offset never depends on `SaveData`'s actual internal layout). `apply()`
+  pushes both to `bn::music::set_volume()`/`bn::sound::set_master_volume()` — the SFX one is a
+  persistent global multiplier, so it already covers the existing `stat_gain`/`stat_loss` cues
+  and any future ones with no per-call-site changes; the music one only affects whatever's
+  *currently* playing, so once Phase 5b's tracks exist, every `bn::music::play()` call site
+  will need to pass the current volume itself too, not rely on this alone.
+  `RoomScreen::show_settings_menu()` is a new Music Volume/SFX Volume/Back menu (D-pad
+  left/right adjusts the selected row, applying live), reachable from a third "Settings" row
+  added to the title screen's New Game/Continue menu (`choose_new_or_continue()` now returns a
+  stable id — 0/1/2 — regardless of whether "Continue" happens to be present, so main.cpp can
+  always recognize "Settings" by id) and from a new in-game pause menu.
+  The pause menu (`RoomScreen::_show_pause_menu()`: Resume/Settings/Main Menu) is reachable via
+  Start from inside `RoomScreen::choose()` — the one blocking choice loop shared by room
+  exploration, `Combat::fight`, and `Dialogue::talk`, so pausing works uniformly everywhere
+  without touching those call sites individually. "Main Menu" calls `bn::core::reset()`
+  ([[noreturn]]) rather than trying to unwind back out of however deep the call stack
+  currently is — SRAM (save slots, settings) already reflects the last explicit save, so a
+  soft reset back to the title screen loses only the in-progress moment, exactly matching what
+  "return to main menu" should do.
 
 **Phase 6 — Polish and cart budget close-out.** Final ROM size check against the chosen
 target (see below), difficulty-curve pass, credits/ending states (`GAME_WON`/`GAME_OVER`
