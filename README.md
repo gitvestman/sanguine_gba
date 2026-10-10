@@ -3,12 +3,15 @@
 A from-scratch Game Boy Advance port of **Sanguine** (`D:\Workspace\Godot\sanguine`, Godot 4.7).
 See [IMPLEMENTATION_PLAN.md](IMPLEMENTATION_PLAN.md) for the full design/roadmap.
 
-**Status:** Phase 0 (toolchain) and Phase 1 (vertical slice) are done. The whole Basement
-floor (10 rooms) is playable: room-to-room navigation, paginated story text, a choice menu,
-d20 skill checks using Sanguine's dice math, a stats sidebar and an item-icon sidebar.
-Not yet ported (later phases): combat, dialogue, save/load, the zodiac door puzzle, and exits
-to other floors. Rooms that would start a fight or a conversation show a short placeholder
-line instead.
+**Status:** Phases 0-4 are complete and Phase 5 (audio) is largely done. The whole manor is
+playable from title screen to escape: 53 rooms across the Basement, First/Second/Third floors
+and the grounds, turn-based d20 combat with animated enemy overlays, NPC dialogue (Countess,
+Ghostly Bride, Golem, Mad Gnome, Prisoner), a usable inventory, the chapel sliding-tile puzzle,
+the Countess's boss fight and the escape endgame. Also in: three SRAM save slots (autosaved on
+every room change), a pause menu with persisted music/SFX volume, ambient torch/candle
+animations, a title screen + coach-ride intro, title/in-game/boss music and dice/stat SFX.
+Remaining (Phase 6): polish, difficulty pass, ROM-size close-out. A browser test build for
+itch.io lives in `web/`.
 
 ## Prerequisites
 
@@ -59,13 +62,16 @@ Fullscreen (`-f`) avoids window-sizing artifacts under WSLg. mGBA's default keys
 
 | GBA | Keyboard | Does |
 |---|---|---|
-| D-pad | Arrow keys | Move the `>` cursor in the choice menu (left/right, or up/down) |
+| D-pad | Arrow keys | Move the `>` cursor in menus (up/down or left/right) |
 | A | X | Confirm a choice, advance a text page, roll the dice |
-| B | Z | (unused so far) |
+| B | Z | Cancel/back (save-slot picker, dice roll prompts, settings, sliding puzzle) |
+| Start | Enter | Pause menu: Resume / Settings (music + SFX volume) / Main Menu |
 
-You start in the **Cellar Hall**. The screen shows the room art, the story text / choice menu
-in the bottom panel, your stats (HP, Sanity, Luck) on the right, and the items you carry as
-icons on the left (4 fit).
+Every room's choice list ends with **Inv**, which opens the inventory (item descriptions, and
+"Use" for usable items). Progress autosaves to one of 3 SRAM slots on every room change; the
+title screen offers New Game / Continue.
+
+A new game starts with the title screen and coach-ride intro, then drops you at the **Outside Gates**. The screen shows the room art, the story text / choice menu in the bottom panel, your stats (HP, Sanity, Luck) on the right, and the items you carry as icons on the left.
 
 To see Butano's `BN_LOG(...)` debug output without the GUI, write mGBA's log to a file:
 
@@ -73,13 +79,26 @@ To see Butano's `BN_LOG(...)` debug output without the GUI, write mGBA's log to 
 mgba-qt -l 255 -C logToFile=1 -C logFile=/tmp/mgba.log sanguine_gba.gba
 ```
 
-## Adding art
+## Adding art and audio
+
+All converters are Python 3 + Pillow scripts in `tools/`; each documents its usage in its
+docstring.
 
 - **Room backgrounds:** `python3 tools/convert_room_bg.py <room.png> assets/rooms` pads the
-  180x140 painting onto a 256x256 canvas, reduces it to 256 colors, and writes a BMP + JSON for
-  Butano. Rename the output to the room's name and add it to `source/rooms/room_registry.cpp`.
+  180x140 painting onto a 256x256 canvas, reduces it to 256 colors (`--bpp4` for 16), and writes
+  a BMP + JSON for Butano. Rename the output to the room's name.
 - **Item icons:** `python3 tools/convert_item_icon.py <icon.png> assets/sprites/item_<name>.bmp`
-  turns a 28x28 icon into a 32x32 sprite. Map it in `source/ui/item_bar.cpp`.
+  turns a 28x28 icon into a 32x32 sprite. Map it in `source/engine/item_info.cpp`.
+- **Enemies / portraits:** `convert_enemy_sprite.py`, `convert_portrait.py`.
+- **Animated flames:** `convert_flame_frames.py` (torch/candle frame strips).
+- **Intro, puzzle, dice:** `convert_intro_tree_layer.py`, `convert_puzzle_tiles.py`,
+  `make_die_sprite.py`.
+- **Audio:** drop `.wav`/`.s3m` files in `assets/audio` (Maxmod backend). `wav_to_s3m_loop.py`
+  wraps a raw PCM clip as a looping `.s3m` for use as music; `make_stat_sfx.py` synthesizes the
+  stat gain/loss tones.
+
+New rooms are a `source/rooms/<name>.{h,cpp}` pair registered in
+`source/rooms/room_registry.cpp`.
 
 Two GBA quirks this code works around (worth knowing before touching graphics code):
 
@@ -94,18 +113,21 @@ Two GBA quirks this code works around (worth knowing before touching graphics co
 ```
 source/
   main.cpp              Entry point
-  engine/               Ported GameState, dice, inventory, room base class (no UI code)
-  rooms/                One .h/.cpp pair per Basement room, plus room_registry.cpp
-  ui/                   Panel, TextBox, ChoiceList, SidePanel (stats), ItemBar (icons),
-                        RoomScreen — the GBA-side "game.gd"
+  engine/               Ported game logic, no UI: GameState, dice, combat, enemies, escape
+                        endgame, inventory/item info, save slots (SRAM), settings, music, RNG,
+                        room base class
+  rooms/                One .h/.cpp pair per room (53), plus room_registry.cpp
+  dialogue/             NPC dialogue trees (Countess, Ghostly Bride, Golem, Mad Gnome, Prisoner)
+  ui/                   Panel, TextBox, ChoiceList, SidePanel (stats), ItemBar (icons), DiceView,
+                        SlidingPuzzle, RoomScreen — the GBA-side "game.gd"
 assets/
-  rooms/                Room backgrounds (BMP + JSON), generated by tools/convert_room_bg.py
-  sprites/              Panel tiles and item icons
+  rooms/                Room backgrounds and title/menu art (BMP + JSON)
+  sprites/              Panel tiles, item icons, enemies, portraits, die, torches/candles
+  audio/                Music (.s3m) and SFX (.wav)
+web/index.html          EmulatorJS wrapper for the itch.io browser test build
 third_party/butano/     Butano engine (git submodule)
-tools/
-  convert_room_bg.py    PNG -> Butano room background
-  convert_item_icon.py  PNG -> Butano item icon sprite
-  make_die_sprite.py    Generates the d20 sprite used for skill-check rolls
+tools/                  Asset converters (see above)
+IMPLEMENTATION_PLAN.md  Design, roadmap and per-phase notes
 ```
 
 ## Toolchain note

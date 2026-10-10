@@ -10,14 +10,13 @@ spinoff sharing this world's cast and opening beat). This plan keeps Sanguine's 
 that structure already fits a handheld's button/menu interface well — and treats the port as
 primarily an **asset-pipeline and content-compression problem**, not a redesign.
 
-**Status (2026-09-26):** Phases 0–4 are complete and committed — all of Phase 4's sub-phases
-(4a dialogue engine, 4b First Floor, 4c Outside, 4d Second Floor, 4e Third Floor + Countess,
-4f escape endgame, 4g title screen) are implemented, boot-tested, and playtested (several
-rounds of bug fixes/polish already folded back in). 4h (usable inventory), 4i (enemy overlay
-scale/movement/ambient appearance), and 4j (ambient torch/candle flicker, added after 4h/4i on
-the user's own follow-up request) are also now implemented and boot-tested, pending playtest.
-Phase 5 (audio) is underway — 5a (settings/volume + pause menu) is done; 5b/5c (the actual
-music/SFX content) haven't started. Phase 6 (polish + itch.io web build) is not started.
+**Status (2026-10-10):** Phases 0–4 are complete and committed (all 4a–4j sub-phases), and
+Phase 5 (audio) is done: 5a settings/pause menu, 5b title theme + Countess boss theme, 5c
+default in-game ambient track, plus dice-roll and success/fail SFX. Later commits added 3 save
+slots, the Children's Room/DrawingRoom/DinnerHall state-dependent art, the Mezuzah Amulet and
+the MusicRoom reward. Phase 6 is partly done: the itch.io web test build (`web/index.html`,
+an EmulatorJS wrapper around the ROM) exists; the difficulty pass, ROM-size close-out and
+remaining polish are still open. Audio has not been verified by ear beyond boot-testing.
 
 Grounded in a real look at the source project, not assumptions:
 
@@ -378,8 +377,8 @@ milestone per the [Audio](#audio) note above.
   pushes both to `bn::music::set_volume()`/`bn::sound::set_master_volume()` — the SFX one is a
   persistent global multiplier, so it already covers the existing `stat_gain`/`stat_loss` cues
   and any future ones with no per-call-site changes; the music one only affects whatever's
-  *currently* playing, so once Phase 5b's tracks exist, every `bn::music::play()` call site
-  will need to pass the current volume itself too, not rely on this alone.
+  *currently* playing, every `bn::music::play()` call site passes
+  `Settings::instance().music_volume()` itself (as 5b/5c's calls do), not relying on this alone.
   `RoomScreen::show_settings_menu()` is a new Music Volume/SFX Volume/Back menu (D-pad
   left/right adjusts the selected row, applying live), reachable from a third "Settings" row
   added to the title screen's New Game/Continue menu (`choose_new_or_continue()` now returns a
@@ -393,7 +392,7 @@ milestone per the [Audio](#audio) note above.
   currently is — SRAM (save slots, settings) already reflects the last explicit save, so a
   soft reset back to the title screen loses only the in-progress moment, exactly matching what
   "return to main menu" should do.
-- **5b (partial) — Title theme. DONE**, first of the priority-ordered tracks above. The source's
+- **5b — Title theme. DONE**, first of the priority-ordered tracks above. The source's
   `Respect for bones 3.ogg` is a streamed MP3 the GBA can't decode, so it's re-purposed rather
   than converted: trimmed to its first 40 seconds and downsampled to mono 8-bit unsigned PCM
   (10512Hz — ffmpeg: `-t 40 -ac 1 -ar 10512 -f u8`), then wrapped as a minimal Scream Tracker 3
@@ -407,14 +406,34 @@ milestone per the [Audio](#audio) note above.
   `RoomScreen::show_title_card()` (`bn::music::play(bn::music_items::title_theme, Settings::
   instance().music_volume())`, loops by default) and stopped in `main.cpp` right before
   `screen.run()` begins real gameplay, matching the source's own intro_music lifetime (title
-  screen through the coach-ride intro, no in-game successor yet). Adds ~430KB to the ROM
+  screen through the coach-ride intro; 5c's default track now takes over there). Adds ~430KB to the ROM
   (2.22MB total) — trimming duration and/or sample rate further directly and linearly reduces
   this if cart budget gets tight; 40s/10512Hz was a first attempt, not a settled number.
   **Not verified by ear** — only that `mmutil` parses it and mgba boots without asserting;
   actual pitch/loop-seam quality (the 40s cut point isn't aligned to any musical
   beat/zero-crossing) needs a real playtest.
 
-**Phase 6 — Polish and cart budget close-out.** Final ROM size check against the chosen
+- **5b (cont.) — Countess boss theme. DONE.** `there_are_angels_and_they_have_cellos_1.mp3`
+  trimmed to its first 20s and run through the same `wav_to_s3m_loop.py` pipeline
+  (`assets/audio/countess_theme.s3m`, ~210KB). `enemy_music_item(EnemyId)` (`engine/enemy.cpp`)
+  returns it for the Countess only, so `Combat::fight` plays a per-enemy boss theme
+  automatically (her GuestBedroom ambush and DinnerHall's "Attack her" get it for free); her
+  dialogue (`FancyCorridor01`) and peaceful dinner ending (`DinnerHall`) start it directly.
+- **5c — Default ambient track. DONE.** `the_librarian_1.mp3` trimmed to 45s
+  (`assets/audio/default_theme.s3m`, ~470KB). `engine/music.{h,cpp}`'s `play_default_theme()`
+  is the single place that starts/resumes it; `main.cpp` starts it when real gameplay begins
+  (replacing the old blanket `stop()`), and the Countess encounters resume it afterward. One
+  track for every room — the source's 5 room-specific tracks (GreatHall, AudienceHall,
+  StoneCorridor, MusicRoom organ, ChildrensRoom) are **not** ported; `play_default_theme()` is
+  where per-room selection would go.
+- **SFX. DONE.** `dice_roll.wav` (once per hop in `DiceView::tumble_to`), `roll_success.wav` /
+  `roll_fail.wav` (when `Dice::roll_check` resolves), plus 5a-era `stat_gain`/`stat_loss`
+  (`GameState`). All 22050Hz mono 8-bit; `bn::sound::set_master_volume()` applies the SFX
+  setting globally. Tracks were peak-normalized and validated with `mmutil`; like the title
+  theme, none have been verified by ear.
+
+**Phase 6 — Polish and cart budget close-out. PARTLY DONE** (web build done: `web/index.html`
+loads `game.gba` via EmulatorJS; remaining: size check, difficulty pass, credits). Final ROM size check against the chosen
 target (see below), difficulty-curve pass, credits/ending states (`GAME_WON`/`GAME_OVER`
 equivalents), and an **itch.io web build**: devkitARM/Butano only ever produce a real `.gba`
 ROM (there's no wasm/web export in this toolchain), so "playable on itch" means wrapping that
